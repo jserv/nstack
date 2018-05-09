@@ -11,6 +11,7 @@
 #ifndef QUEUE_R_H
 #define QUEUE_R_H
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -81,18 +82,17 @@ static inline void queue_commit(queue_cb_t *cb)
  * @param index is the location where element is located in the buffer.
  * @return 0 if queue is empty; otherwise operation was succeed.
  */
-static inline int queue_peek(queue_cb_t *cb, int *index)
+static inline bool queue_peek(queue_cb_t *cb, int *index)
 {
     const size_t read = cb->m_read;
     const size_t b_size = cb->b_size;
 
     /* Check that the queue is not empty */
     if (read == cb->m_write)
-        return 0;
+        return false;
 
     *index = read * b_size;
-
-    return 1;
+    return true;
 }
 
 /**
@@ -150,9 +150,9 @@ static inline int queue_isempty(queue_cb_t *cb)
  * @param cb is a pointer to the queue control block.
  * @return 0 if the queue is not full.
  */
-static inline int queue_isfull(queue_cb_t *cb)
+static inline bool queue_isfull(queue_cb_t *cb)
 {
-    return (int) (((cb->m_write + 1) % cb->a_len) == cb->m_read);
+    return ((cb->m_write + 1) % cb->a_len) == cb->m_read;
 }
 
 #endif /* QUEUE_R_H */
