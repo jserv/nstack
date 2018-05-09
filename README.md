@@ -50,6 +50,11 @@ ip_input: proto id: 0x1
 icmp_input: ICMP type: 8
 ```
 
+# Licensing
+
+nstack is freely redistributable under the two-clause BSD License.
+Use of this source code is governed by a BSD-style license that can be found
+in the `LICENSE` file.
 
 # Reference
 
