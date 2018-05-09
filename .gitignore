@@ -1,0 +1,5 @@
+*.o
+*.d
+*.swp
+build/
+__pycache__/
