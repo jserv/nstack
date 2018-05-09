@@ -3,10 +3,12 @@
 
 #include <stdio.h>
 
-#define LOG_ERR '1'
-#define LOG_WARN '2'
-#define LOG_INFO '3'
-#define LOG_DEBUG '4'
+enum log_level {
+    LOG_ERR = '1',
+    LOG_WARN = '2',
+    LOG_INFO = '3',
+    LOG_DEBUG = '4',
+};
 
 #define LOG(_level_, _fmt_, ...)                   \
     do {                                           \
