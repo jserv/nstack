@@ -5,11 +5,11 @@
 #include "nstack_ip.h"
 #include "nstack_socket.h"
 
-#include "logger.h"
 #include "collection.h"
+#include "logger.h"
+#include "nstack_internal.h"
 #include "tcp.h"
 #include "tree.h"
-#include "nstack_internal.h"
 
 #define TCP_TIMER_MS 250
 #define TCP_FIN_WAIT_TIMEOUT_MS 20000

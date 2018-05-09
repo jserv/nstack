@@ -189,8 +189,7 @@ int ip_input(const struct ether_hdr *e_hdr, uint8_t *payload, size_t bsize)
         return 0;
     }
 
-    SET_FOREACH(tmpp, _ip_proto_handlers)
-    {
+    SET_FOREACH (tmpp, _ip_proto_handlers) {
         proto = *tmpp;
         if (proto->proto_id == ip->ip_proto) {
             break;

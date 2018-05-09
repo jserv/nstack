@@ -12,13 +12,13 @@
 #include "nstack_in.h"
 #include "nstack_socket.h"
 
-#include "logger.h"
 #include "collection.h"
-#include "tcp.h"
-#include "udp.h"
+#include "logger.h"
 #include "nstack_ether.h"
 #include "nstack_internal.h"
 #include "nstack_ip.h"
+#include "tcp.h"
+#include "udp.h"
 
 /**
  * nstack ingress and egress thread state.
@@ -128,8 +128,7 @@ static void run_periodic_tasks(int delta_time)
 {
     void **taskp;
 
-    SET_FOREACH(taskp, _nstack_periodic_tasks)
-    {
+    SET_FOREACH (taskp, _nstack_periodic_tasks) {
         nstack_periodic_task_t *task = *(nstack_periodic_task_t **) taskp;
 
         if (task)

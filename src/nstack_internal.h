@@ -4,8 +4,8 @@
 #include <stdatomic.h>
 #include <sys/time.h>
 
-#include "tree.h"
 #include "nstack_socket.h"
+#include "tree.h"
 
 #define NSTACK_CTRL_FLAG_DYING 0x8000
 

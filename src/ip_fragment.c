@@ -6,8 +6,8 @@
 #include "nstack_in.h"
 
 #include "logger.h"
-#include "tree.h"
 #include "nstack_ip.h"
+#include "tree.h"
 
 #define FRAG_MAX 8192
 #define FRAG_MAP_SIZE (FRAG_MAX / 32)

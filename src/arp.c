@@ -5,11 +5,11 @@
 
 #include "ip_defer.h"
 #include "logger.h"
-#include "tree.h"
 #include "nstack_arp.h"
 #include "nstack_ether.h"
 #include "nstack_internal.h"
 #include "nstack_ip.h"
+#include "tree.h"
 
 #define ARP_CACHE_AGE_MAX (20 * 60 * 60) /* Expiration time */
 

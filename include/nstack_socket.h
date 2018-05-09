@@ -11,8 +11,8 @@
 #include <sys/types.h>
 
 #include "linker_set.h"
-#include "queue_r.h"
 #include "nstack_in.h"
+#include "queue_r.h"
 
 #define NSTACK_SHMEM_SIZE                                            \
     (sizeof(struct nstack_sock_ctrl) + 2 * sizeof(struct queue_cb) + \

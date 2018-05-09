@@ -5,8 +5,8 @@
 #include "nstack_util.h"
 
 #include "collection.h"
-#include "tree.h"
 #include "nstack_ip.h"
+#include "tree.h"
 
 struct ip_route_entry {
     struct ip_route route;
@@ -144,8 +144,7 @@ int ip_route_find_by_network(in_addr_t addr, struct ip_route *route)
         if (entry)
             goto match;
     case 1: /* Then with network masks */
-        RB_FOREACH(entry, rib_routetree, &rib_routetree)
-        {
+        RB_FOREACH (entry, rib_routetree, &rib_routetree) {
             if (entry->route.r_network == (addr & entry->route.r_netmask)) {
                 goto match;
             }

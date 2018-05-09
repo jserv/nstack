@@ -9,11 +9,11 @@
 
 #include "ip_defer.h"
 #include "logger.h"
-#include "udp.h"
 #include "nstack_arp.h"
 #include "nstack_icmp.h"
 #include "nstack_internal.h"
 #include "nstack_ip.h"
+#include "udp.h"
 
 RB_HEAD(udp_sock_tree, nstack_sock);
 

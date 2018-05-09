@@ -13,8 +13,7 @@ int ether_input(const struct ether_hdr *hdr, uint8_t *payload, size_t bsize)
     struct _ether_proto_handler *proto;
     int retval;
 
-    SET_FOREACH(tmpp, _ether_proto_handlers)
-    {
+    SET_FOREACH (tmpp, _ether_proto_handlers) {
         proto = *tmpp;
         if (proto->proto_id == hdr->h_proto) {
             break;
