@@ -7,7 +7,7 @@ CFLAGS += -include config.h -I include
 
 SRC = src
 
-OBJS := \
+OBJS_core := \
 	arp.o \
 	ether.o \
 	ether_fcs.o \
@@ -18,29 +18,32 @@ OBJS := \
 	ip_route.o \
 	tcp.o \
 	udp.o \
-	socket.o
-
-OBJS += \
+	nstack.o \
 	linux/ether.o
+OBJS_core := $(addprefix $(OUT)/, $(OBJS_core))
 
-# stack entry
-OBJS += nstack.o
+OBJS_socket := \
+	socket.o
+OBJS_socket := $(addprefix $(OUT)/, $(OBJS_socket))
 
-OBJS := $(addprefix $(OUT)/, $(OBJS))
+OBJS := $(OBJS_core) $(OBJS_socket)
 deps := $(OBJS:%.o=%.o.d)
 
 SHELL_HACK := $(shell mkdir -p $(OUT))
 SHELL_HACK := $(shell mkdir -p $(OUT)/linux)
 
-EXEC = $(OUT)/inetd
+EXEC = $(OUT)/inetd $(OUT)/unetcat
 
 all: $(EXEC)
 
 $(OUT)/%.o: $(SRC)/%.c
 	$(CC) -o $@ $(CFLAGS) -c -MMD -MF $@.d $<
 
-$(OUT)/inetd: $(OBJS)
+$(OUT)/inetd: $(OBJS_core)
 	$(CC) $(CFLAGS) -o $@ $^
+
+$(OUT)/unetcat: $(OBJS_socket)
+	$(CC) $(CFLAGS) -o $@ tests/unetcat.c $^
 
 clean:
 	$(RM) $(EXEC) $(OBJS) $(deps)
