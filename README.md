@@ -9,7 +9,7 @@ nstack is a Linux userspace TCP/IP stack. It was constructed to meet the followi
 
 Current features:
 * One network interface and socket
-* thernet II frame handling
+* Ethernet frame handling
 * ARP request/reply, simple caching
 * ICMP pings and replies
 * IPv4 packet handling, checksum
