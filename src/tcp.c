@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "nstack_ip.h"
 #include "nstack_socket.h"
@@ -213,7 +214,8 @@ static int tcp_fsm(struct tcp_conn_tcb *conn, struct tcp_hdr *rs)
 
             rs->tcp_flags |= TCP_ACK;
             rs->tcp_ack_num = rs->tcp_seqno + 1;
-            rs->tcp_seqno = 0; /* TODO Randomize */
+            srand(time(NULL));
+            rs->tcp_seqno = rand() % 100;
 
             conn->state = TCP_SYN_RCVD;
             conn->recv_next = rs->tcp_ack_num;
