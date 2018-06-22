@@ -94,8 +94,7 @@ static int udp_input(const struct ip_hdr *ip_hdr,
     if (sock) {
         int retval;
         struct nstack_sockaddr srcaddr = {
-            .inet4_addr = ip_hdr->ip_src,
-            .port = udp->udp_sport,
+            .inet4_addr = ip_hdr->ip_src, .port = udp->udp_sport,
         };
 
         retval = nstack_sock_dgram_input(sock, &srcaddr,
@@ -133,6 +132,46 @@ static int udp_input(const struct ip_hdr *ip_hdr,
 }
 IP_PROTO_INPUT_HANDLER(IP_PROTO_UDP, udp_input);
 
+static uint16_t udp_csum(const void *buff,
+                  size_t len,
+                  in_addr_t src_addr,
+                  in_addr_t dest_addr)
+{
+    const uint16_t *buf = buff;
+    uint16_t *ip_src = (void *) &src_addr, *ip_dst = (void *) &dest_addr;
+    uint32_t sum;
+    size_t length = len;
+
+    // Calculate the sum
+    sum = 0;
+    while (len > 1) {
+        sum += *buf++;
+        if (sum & 0x80000000)
+            sum = (sum & 0xFFFF) + (sum >> 16);
+        len -= 2;
+    }
+    // Add the padding if the packet lenght is odd
+    if (len & 1)
+        sum += *((uint8_t *) buf);
+
+    // Add the pseudo-header
+    sum += *(ip_src++);
+    sum += *ip_src;
+
+    sum += *(ip_dst++);
+    sum += *ip_dst;
+
+    sum += htons(IPPROTO_UDP);
+    sum += htons(length);
+
+    // Add the carries
+    while (sum >> 16)
+        sum = (sum & 0xFFFF) + (sum >> 16);
+
+    // Return the one's complement of sum
+    return ((uint16_t)(~sum));
+}
+
 int nstack_udp_send(struct nstack_sock *sock, const struct nstack_dgram *dgram)
 {
     uint8_t buf[sizeof(struct udp_hdr) + dgram->buf_size];
@@ -149,7 +188,15 @@ int nstack_udp_send(struct nstack_sock *sock, const struct nstack_dgram *dgram)
     udp->udp_sport = sock->info.sock_addr.port;
     udp->udp_dport = dgram->dstaddr.port;
     udp->udp_len = sizeof(struct udp_hdr) + dgram->buf_size;
-    udp->udp_csum = 0; /* TODO calc UDP csum */
+    udp->udp_csum = 0;
+    /* Calculate UDP csum */
+    int chk = udp_csum(udp, udp->udp_len, dgram->srcaddr.inet4_addr,
+                       dgram->dstaddr.inet4_addr);
+
+    if (chk) {
+        LOG(LOG_INFO, "Checksum error: %d", chk);
+        return -1;
+    }
 
     memcpy(payload, dgram->buf, dgram->buf_size);
 
