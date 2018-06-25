@@ -133,9 +133,9 @@ static int udp_input(const struct ip_hdr *ip_hdr,
 IP_PROTO_INPUT_HANDLER(IP_PROTO_UDP, udp_input);
 
 static uint16_t udp_checksum(const void *buff,
-                  size_t len,
-                  in_addr_t src_addr,
-                  in_addr_t dest_addr)
+                             size_t len,
+                             in_addr_t src_addr,
+                             in_addr_t dest_addr)
 {
     const uint16_t *buf = buff;
     uint16_t *ip_src = (void *) &src_addr, *ip_dst = (void *) &dest_addr;
@@ -191,7 +191,7 @@ int nstack_udp_send(struct nstack_sock *sock, const struct nstack_dgram *dgram)
     udp->udp_csum = 0;
     /* Calculate UDP csum */
     int chk = udp_checksum(udp, udp->udp_len, dgram->srcaddr.inet4_addr,
-                       dgram->dstaddr.inet4_addr);
+                           dgram->dstaddr.inet4_addr);
 
     if (chk) {
         LOG(LOG_INFO, "Checksum error: %d", chk);
