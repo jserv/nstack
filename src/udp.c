@@ -142,7 +142,7 @@ static uint16_t udp_csum(const void *buff,
     uint32_t sum;
     size_t length = len;
 
-    // Calculate the sum
+    /* Calculate the sum */
     sum = 0;
     while (len > 1) {
         sum += *buf++;
@@ -150,11 +150,11 @@ static uint16_t udp_csum(const void *buff,
             sum = (sum & 0xFFFF) + (sum >> 16);
         len -= 2;
     }
-    // Add the padding if the packet lenght is odd
+    /* Add the padding if the packet lenght is odd */
     if (len & 1)
         sum += *((uint8_t *) buf);
 
-    // Add the pseudo-header
+    /* Add the pseudo-header */
     sum += *(ip_src++);
     sum += *ip_src;
 
@@ -164,11 +164,11 @@ static uint16_t udp_csum(const void *buff,
     sum += htons(IPPROTO_UDP);
     sum += htons(length);
 
-    // Add the carries
+    /* Add the carries */
     while (sum >> 16)
         sum = (sum & 0xFFFF) + (sum >> 16);
 
-    // Return the one's complement of sum
+    /* Return the one's complement of sum */
     return ((uint16_t)(~sum));
 }
 
