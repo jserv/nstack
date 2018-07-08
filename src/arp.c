@@ -141,9 +141,7 @@ int arp_cache_get_haddr(in_addr_t iface, in_addr_t ip_addr, mac_addr_t haddr)
 
 static void arp_cache_update(int delta_time)
 {
-    size_t i;
-
-    for (i = 0; i < num_elem(arp_cache); i++) {
+    for (size_t i = 0; i < num_elem(arp_cache); i++) {
         struct arp_cache_entry *entry = &arp_cache[i];
 
         if (entry->age > ARP_CACHE_AGE_MAX) {
