@@ -25,7 +25,7 @@ make
 
 Set up test environment:
 ```shell
-tools/testenv.sh start
+sudo tools/testenv.sh start
 tools/run.sh veth1
 ```
 
