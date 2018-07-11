@@ -50,6 +50,11 @@ ip_input: proto id: 0x1
 icmp_input: ICMP type: 8
 ```
 
+Ending the test environment:
+```shell
+sudo tools/testenv.sh stop
+```
+
 # Licensing
 
 nstack is freely redistributable under the two-clause BSD License.
