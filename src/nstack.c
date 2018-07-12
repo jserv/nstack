@@ -326,17 +326,32 @@ void nstack_stop(void)
 
 int main(int argc, char *argv[])
 {
+    /* getopt support */
+    int opt; 
+    char *intf, *mac;
+    while((opt = getopt(argc, argv, "i:m:")) != -1){
+        switch (opt) {
+            case 'i':
+                /* interface, e.g. veth0, eth0 ...  */
+                intf = optarg;
+                break;
+            case 'm':
+                /* mac Address */
+                mac = optarg;
+                break;
+            default: /* not match */
+                fprintf(stderr, "Usage: %s [-i <interface>] [-m <mac_addr>] [-h]\n",argv[0]);
+                exit(EXIT_FAILURE);
+        }
+    }
+    
     char *const ether_args[] = {
-        argv[1],
-        NULL,
+        intf,
+        mac
     };
+
     int handle;
     sigset_t sigset;
-
-    if (argc == 1) {
-        fprintf(stderr, "Usage: %s INTERFACE\n", argv[0]);
-        exit(1);
-    }
 
     sigemptyset(&sigset);
     sigaddset(&sigset, SIGUSR1);
@@ -350,6 +365,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    /* 167772162    => 10.0.0.2, 4294967040   => 255.255.255.0 */
     if (ip_config(handle, 167772162, 4294967040)) {
         perror("Failed to config IP");
         exit(1);

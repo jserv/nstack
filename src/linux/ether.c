@@ -132,21 +132,46 @@ int ether_init(char *const args[])
     /* Get the index of the interface */
     memset(&eth->el_if_idx, 0, sizeof(struct ifreq));
     strncpy(eth->el_if_idx.ifr_name, if_name, IFNAMSIZ - 1);
+    /* ioctl - control current ethernet file descriptor,
+        if return any error code, then goto "fail"
+     */
     if (ioctl(eth->el_fd, SIOCGIFINDEX, &eth->el_if_idx) < 0) {
         goto fail;
     }
 
     /* Get the MAC address of the interface */
     if (args[0] && args[1]) { /* MAC addr given by the user */
-        /* TODO Parse MAC addr */
-        errno = ENOTSUP;
-        return -1;
+                              /* TODO Parse MAC addr
+                                  Currently inetd (e.g. `nstack.c` main function )
+                      
+                                  args[0] = argv[1], which specify "network interface"
+                                  args[1] = NULL (default value), modified to support user specified
+                                 mac address
+                              */
+        // errno = ENOTSUP;
+        // return -1;
+        if (ioctl(eth->el_fd, SIOCGIFHWADDR, &args[1]) < 0) {
+            goto fail;
+        }
+
+        int mac_seg[6];
+        /* adding "%c" on the end of format string, to secure there are no
+            extraneous char after the sixth octet */
+        if (6 == sscanf(args[1], "%x:%x:%x:%x:%x:%x%*c", &mac_seg[0],
+                        &mac_seg[1], &mac_seg[2], &mac_seg[3], &mac_seg[4],
+                        &mac_seg[5])) {
+            /* convert to uint8, then assign to eth->el_mac */
+            for (int i = 0; i < 6; ++i) {
+                eth->el_mac[i] = (uint8_t) mac_seg[i];
+            }
+        }
     } else { /* Use the default MAC addr */
         memset(&if_mac, 0, sizeof(struct ifreq));
         strncpy(if_mac.ifr_name, if_name, IFNAMSIZ - 1);
         if (ioctl(eth->el_fd, SIOCGIFHWADDR, &if_mac) < 0) {
             goto fail;
         }
+        /* Notice: macAddr = 48 bits (6 x 8 bits), mac address configuration*/
         eth->el_mac[0] = ((uint8_t *) &if_mac.ifr_hwaddr.sa_data)[0];
         eth->el_mac[1] = ((uint8_t *) &if_mac.ifr_hwaddr.sa_data)[1];
         eth->el_mac[2] = ((uint8_t *) &if_mac.ifr_hwaddr.sa_data)[2];
