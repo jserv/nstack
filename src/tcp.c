@@ -241,15 +241,16 @@ static int tcp_fsm(struct tcp_conn_tcb *conn, struct tcp_hdr *rs, size_t bsize)
         return tcp_hdr_size(rs);
     case TCP_ESTABLISHED:
         LOG(LOG_INFO, "TCP state: TCP_ESTABLISHED");
-        if (rs->tcp_flags & TCP_ACK && rs->tcp_flags & TCP_PSH &&
-            rs->tcp_seqno == conn->recv_next && rs->tcp_ack_num == conn->send_next) { /* data handling */
+        if ((rs->tcp_flags & TCP_ACK) && (rs->tcp_flags & TCP_PSH) &&
+            rs->tcp_seqno == conn->recv_next && rs->tcp_ack_num == conn->send_next) { 
+            /* data handling */
             rs->tcp_flags &= ~TCP_PSH;
             rs->tcp_ack_num = rs->tcp_seqno + (bsize - tcp_hdr_size(rs));
             rs->tcp_seqno = conn->send_next;
             
             conn->recv_next = rs->tcp_ack_num;
-            conn->send_next = rs->tcp_seqno; 
-            /* TODO upload payload to application layer for further pasing */
+            conn->send_next = rs->tcp_seqno;
+            /* TODO forward the payload to application layer */
             return tcp_hdr_size(rs);
         }
         if (rs->tcp_flags & TCP_FIN) { /* Close connection. */
