@@ -4,4 +4,4 @@
 dd if=/dev/zero of=/tmp/unetcat.sock bs=1024 count=1024
 
 sudo setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip build/inetd
-sudo ip netns exec TEST su $USER -c "build/inetd $1"
+sudo ip netns exec TEST su $USER -c "build/inetd -i $1"
