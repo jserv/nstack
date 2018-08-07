@@ -70,9 +70,8 @@ static int linux_ether_bind(struct ether_linux *eth)
     /* Allow the socket to be reused. */
     retval = setsockopt(eth->el_fd, SOL_SOCKET, SO_REUSEADDR, &sockopt,
                         sizeof(sockopt));
-    if (retval == -1) {
+    if (retval == -1)
         return -1;
-    }
 
     socket_address.sll_family = AF_PACKET;
     socket_address.sll_protocol = htons(ETH_P_ALL);
@@ -125,16 +124,14 @@ int ether_init(char *const args[])
         strcpy(if_name, DEFAULT_IF);
     }
 
-    if ((eth->el_fd = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW)) == -1) {
+    if ((eth->el_fd = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW)) == -1)
         return -1;
-    }
 
     /* Get the index of the interface */
     memset(&eth->el_if_idx, 0, sizeof(struct ifreq));
     strncpy(eth->el_if_idx.ifr_name, if_name, IFNAMSIZ - 1);
-    if (ioctl(eth->el_fd, SIOCGIFINDEX, &eth->el_if_idx) < 0) {
+    if (ioctl(eth->el_fd, SIOCGIFINDEX, &eth->el_if_idx) < 0)
         goto fail;
-    }
 
     /* Get the MAC address of the interface */
     if (args[0] && args[1]) { /* MAC addr given by the user */
@@ -155,13 +152,11 @@ int ether_init(char *const args[])
         eth->el_mac[5] = ((uint8_t *) &if_mac.ifr_hwaddr.sa_data)[5];
     }
 
-    if (linux_ether_bind(eth)) {
+    if (linux_ether_bind(eth))
         goto fail;
-    }
 
-    if (linux_ether_set_rxtimeout(eth)) {
+    if (linux_ether_set_rxtimeout(eth))
         goto fail;
-    }
 
     return handle;
 fail:
@@ -173,9 +168,8 @@ void ether_deinit(int handle)
 {
     struct ether_linux *eth;
 
-    if (!(eth = ether_handle2eth(handle))) {
+    if (!(eth = ether_handle2eth(handle)))
         return;
-    }
 
     close(eth->el_fd);
 }
@@ -190,9 +184,8 @@ int ether_receive(int handle, struct ether_hdr *hdr, uint8_t *buf, size_t bsize)
     assert(hdr != NULL);
     assert(buf != NULL);
 
-    if (!(eth = ether_handle2eth(handle))) {
+    if (!(eth = ether_handle2eth(handle)))
         return -1;
-    }
 
     do {
         retval =
@@ -269,9 +262,8 @@ int ether_send(int handle,
     retval = (int) sendto(eth->el_fd, frame, frame_size, 0,
                           (struct sockaddr *) (&socket_address),
                           sizeof(socket_address));
-    if (retval < 0) {
+    if (retval < 0)
         retval = -errno;
-    }
 out:
     return retval;
 }

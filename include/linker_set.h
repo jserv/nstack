@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 1999 John D. Polstra
- * Copyright (c) 1999,2001 Peter Wemm <peter@FreeBSD.org>
+ * Copyright (c) 1999, 2001 Peter Wemm <peter@FreeBSD.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

@@ -30,9 +30,8 @@ int ip_config(int ether_handle, in_addr_t ip_addr, in_addr_t netmask)
     ip_route_update(&route);
 
     /* Announce that we are online. */
-    for (size_t i = 0; i < 3; i++) {
+    for (size_t i = 0; i < 3; i++)
         arp_gratuitous(ether_handle, ip_addr);
-    }
 
     return 0;
 }
@@ -47,18 +46,16 @@ uint16_t ip_checksum(void *dp, size_t bsize)
     for (i = 0; i + 1 < bsize; i += 2) {
         memcpy(&word, data + i, 2);
         acc += word;
-        if (acc > 0xffff) {
+        if (acc > 0xffff)
             acc -= ntohs(0xffff);
-        }
     }
 
     if (bsize & 1) {
         word = 0;
         memcpy(&word, data + bsize - 1, 1);
         acc += word;
-        if (acc > 0xffff) {
+        if (acc > 0xffff)
             acc -= ntohs(0xffff);
-        }
     }
 
     return ~acc;
@@ -147,9 +144,9 @@ int ip_input(const struct ether_hdr *e_hdr, uint8_t *payload, size_t bsize)
         return 0;
     }
 
-    /*
-     * RFE The packet header is already modified with ntoh so this wont work.
-     */
+/*
+ * RFE The packet header is already modified with ntoh so this wont work.
+ */
 #if 0
     if (ip_checksum(ip, hlen) != 0) {
         LOG(LOG_ERR, "Drop due to an invalid checksum");
@@ -191,9 +188,8 @@ int ip_input(const struct ether_hdr *e_hdr, uint8_t *payload, size_t bsize)
 
     SET_FOREACH (tmpp, _ip_proto_handlers) {
         proto = *tmpp;
-        if (proto->proto_id == ip->ip_proto) {
+        if (proto->proto_id == ip->ip_proto)
             break;
-        }
         proto = NULL;
     }
 
@@ -203,9 +199,8 @@ int ip_input(const struct ether_hdr *e_hdr, uint8_t *payload, size_t bsize)
         int retval;
 
         retval = proto->fn(ip, payload + hlen, bsize - hlen);
-        if (retval > 0) {
+        if (retval > 0)
             retval = ip_reply_header(ip, retval);
-        }
         if (retval == -ENOTSOCK) {
             LOG(LOG_INFO, "Unreachable port");
 
@@ -264,9 +259,8 @@ static int ip_send_fragments(int ether_handle,
         memmove(data, data + offset, plen);
         eret = ether_send(ether_handle, dst_mac, ETHER_PROTO_IPV4, payload,
                           ip_hdr.ip_len);
-        if (eret < 0) {
+        if (eret < 0)
             return eret;
-        }
         retval += eret;
         offset += plen;
     } while (bytes > 0);

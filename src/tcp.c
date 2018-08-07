@@ -144,26 +144,23 @@ static uint16_t tcp_checksum(const struct nstack_sockaddr *restrict src,
     for (i = 0; i + 1 < 12; i += 2) {
         memcpy(&word, (uint8_t *) (&pseudo_header) + i, 2);
         acc += word;
-        if (acc > 0xffff) {
+        if (acc > 0xffff)
             acc -= ntohs(0xffff);
-        }
     }
 
     for (i = 0; i + 1 < bsize; i += 2) {
         memcpy(&word, data + i, 2);
         acc += word;
-        if (acc > 0xffff) {
+        if (acc > 0xffff)
             acc -= ntohs(0xffff);
-        }
     }
 
     if (bsize & 1) {
         word = 0;
         memcpy(&word, data + bsize - 1, 1);
         acc += word;
-        if (acc > 0xffff) {
+        if (acc > 0xffff)
             acc -= ntohs(0xffff);
-        }
     }
 
     return ~acc;
@@ -242,12 +239,13 @@ static int tcp_fsm(struct tcp_conn_tcb *conn, struct tcp_hdr *rs, size_t bsize)
     case TCP_ESTABLISHED:
         LOG(LOG_INFO, "TCP state: TCP_ESTABLISHED");
         if ((rs->tcp_flags & TCP_ACK) && (rs->tcp_flags & TCP_PSH) &&
-            rs->tcp_seqno == conn->recv_next && rs->tcp_ack_num == conn->send_next) { 
+            rs->tcp_seqno == conn->recv_next &&
+            rs->tcp_ack_num == conn->send_next) {
             /* data handling */
             rs->tcp_flags &= ~TCP_PSH;
             rs->tcp_ack_num = rs->tcp_seqno + (bsize - tcp_hdr_size(rs));
             rs->tcp_seqno = conn->send_next;
-            
+
             conn->recv_next = rs->tcp_ack_num;
             conn->send_next = rs->tcp_seqno;
             /* TODO forward the payload to application layer */
@@ -277,7 +275,7 @@ static int tcp_fsm(struct tcp_conn_tcb *conn, struct tcp_hdr *rs, size_t bsize)
             conn->state = TCP_CLOSED;
             return 0;
         }
-        /* TODO handle error? */
+    /* TODO handle error? */
     case TCP_TIME_WAIT:
         LOG(LOG_INFO, "TCP state: TCP_TIME_WAIT");
     default:
@@ -310,7 +308,7 @@ static int tcp_input(const struct ip_hdr *ip_hdr,
     attr.remote.inet4_addr = ip_hdr->ip_src;
     attr.remote.port = ntohs(tcp->tcp_sport);
 
-    /* TODO Can't verify on LXC env */
+/* TODO Can't verify on LXC env */
 #if 0
     if (tcp_checksum(&attr.remote, &attr.local, tcp, bsize) != 0) {
         LOG(LOG_INFO, "TCP checksum fail");

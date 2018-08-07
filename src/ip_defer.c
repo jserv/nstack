@@ -33,18 +33,15 @@ int ip_defer_push(in_addr_t dst,
     const size_t next = (q_wr + 1) % num_elem(ip_defer_queue);
     struct ip_defer *slot;
 
-    if (defer_inhibit) {
+    if (defer_inhibit)
         return -EALREADY;
-    }
 
-    if (next == q_rd) {
+    if (next == q_rd)
         return -ENOBUFS;
-    }
     slot = ip_defer_queue + q_wr;
 
-    if (bsize > ETHER_ALEN) {
+    if (bsize > ETHER_ALEN)
         return -EMSGSIZE;
-    }
 
     slot->tries = 0;
     slot->dst = dst;
@@ -57,18 +54,16 @@ int ip_defer_push(in_addr_t dst,
 
 static struct ip_defer *ip_defer_peek(void)
 {
-    if (q_rd == q_wr) {
+    if (q_rd == q_wr)
         return NULL;
-    }
 
     return ip_defer_queue + q_rd;
 }
 
 static void ip_defer_drop(void)
 {
-    if (q_rd == q_wr) {
+    if (q_rd == q_wr)
         return;
-    }
 
     q_rd = (q_rd + 1) % num_elem(ip_defer_queue);
 }
@@ -78,9 +73,8 @@ void ip_defer_handler(int delta_time __unused)
     defer_inhibit = 1;
     while (1) {
         struct ip_defer *ipd = ip_defer_peek();
-        if (!ipd) {
+        if (!ipd)
             return;
-        }
 
         if (ipd->tries++ > 3) { /* Drop the packet after couple of tries. */
             char str_ip[IP_STR_LEN];

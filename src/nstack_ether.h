@@ -68,8 +68,7 @@ struct _ether_proto_handler {
  */
 #define ETHER_PROTO_INPUT_HANDLER(_proto_id_, _handler_fn_)                    \
     static struct _ether_proto_handler _ether_proto_handler_##_handler_fn_ = { \
-        .proto_id = _proto_id_,                                                \
-        .fn = _handler_fn_,                                                    \
+        .proto_id = _proto_id_, .fn = _handler_fn_,                            \
     };                                                                         \
     DATA_SET(_ether_proto_handlers, _ether_proto_handler_##_handler_fn_)
 

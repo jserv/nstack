@@ -64,16 +64,14 @@ int arp_cache_insert(in_addr_t ip_addr,
                      const mac_addr_t haddr,
                      enum arp_cache_entry_type type)
 {
-    size_t i;
     struct arp_cache_entry *it;
     struct arp_cache_entry *entry = NULL;
 
-    if (ip_addr == 0) {
+    if (ip_addr == 0)
         return 0;
-    }
 
     it = arp_cache;
-    for (i = 0; i < num_elem(arp_cache); i++) {
+    for (size_t i = 0; i < num_elem(arp_cache); i++) {
         if (it->age == ARP_CACHE_FREE) {
             entry = it;
         } else if ((entry && entry->age > it->age) ||
@@ -91,9 +89,9 @@ int arp_cache_insert(in_addr_t ip_addr,
     if (!entry) {
         errno = ENOMEM;
         return -1;
-    } else if (entry->age >= 0) {
-        RB_REMOVE(arp_cache_tree, &arp_cache_head, entry);
     }
+    if (entry->age >= 0)
+        RB_REMOVE(arp_cache_tree, &arp_cache_head, entry);
 
     entry->ip_addr = ip_addr;
     memcpy(entry->haddr, haddr, sizeof(mac_addr_t));
@@ -162,9 +160,8 @@ static int arp_input(const struct ether_hdr *hdr __unused,
 
     arp_ntoh(arp_net, &arp);
 
-    if (arp.arp_htype != ARP_HTYPE_ETHER) {
+    if (arp.arp_htype != ARP_HTYPE_ETHER)
         return -EPROTOTYPE;
-    }
 
     if (arp.arp_ptype == ETHER_PROTO_IPV4) {
         struct ip_route route;

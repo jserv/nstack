@@ -9,9 +9,8 @@ uint32_t ether_fcs(const void *data, size_t bsize)
         0x000F9344, 0x1DB88320, 0xA005713C, 0xBDB26158, 0x9B6B51F4, 0x86DC4190,
         0xD6D930AC, 0xCB6E20C8, 0xEDB71064, 0xF0000000};
     uint32_t crc = 0;
-    size_t i;
 
-    for (i = 0; i < bsize; i++) {
+    for (size_t i = 0; i < bsize; i++) {
         crc = (crc >> 4) ^ crc_table[(crc ^ (dp[i] >> 0)) & 0x0F];
         crc = (crc >> 4) ^ crc_table[(crc ^ (dp[i] >> 4)) & 0x0F];
     }

@@ -39,8 +39,7 @@ static pthread_t ingress_tid, egress_tid;
 static int ether_handle;
 
 static nstack_send_fn *proto_send[] = {
-    [XIP_PROTO_TCP] = nstack_tcp_send,
-    [XIP_PROTO_UDP] = nstack_udp_send,
+        [XIP_PROTO_TCP] = nstack_tcp_send, [XIP_PROTO_UDP] = nstack_udp_send,
 };
 
 static struct nstack_sock sockets[] = {
@@ -203,8 +202,7 @@ static void *nstack_egress_thread(void *arg)
 
     while (1) {
         struct timespec timeout = {
-            .tv_sec = NSTACK_PERIODIC_EVENT_SEC,
-            .tv_nsec = 0,
+            .tv_sec = NSTACK_PERIODIC_EVENT_SEC, .tv_nsec = 0,
         };
 
         sigtimedwait(&sigset, NULL, &timeout);
@@ -236,9 +234,8 @@ static void *nstack_egress_thread(void *arg)
             }
         }
 
-        if (get_state() == NSTACK_DYING) {
+        if (get_state() == NSTACK_DYING)
             break;
-        }
     }
 
     pthread_exit(NULL);
@@ -269,8 +266,7 @@ static void nstack_init(void)
 
         sock->ctrl = NSTACK_SOCK_CTRL(pa);
         *sock->ctrl = (struct nstack_sock_ctrl){
-            .pid_inetd = mypid,
-            .pid_end = 0,
+            .pid_inetd = mypid, .pid_end = 0,
         };
 
         sock->ingress_data = NSTACK_INGRESS_DADDR(pa);
@@ -327,8 +323,7 @@ void nstack_stop(void)
 int main(int argc, char *argv[])
 {
     char *const ether_args[] = {
-        argv[1],
-        NULL,
+        argv[1], NULL,
     };
     int handle;
     sigset_t sigset;

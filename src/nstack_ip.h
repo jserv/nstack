@@ -99,8 +99,7 @@ struct _ip_proto_handler {
  */
 #define IP_PROTO_INPUT_HANDLER(_proto_id_, _handler_fn_)                 \
     static struct _ip_proto_handler _ip_proto_handler_##_handler_fn_ = { \
-        .proto_id = _proto_id_,                                          \
-        .fn = _handler_fn_,                                              \
+        .proto_id = _proto_id_, .fn = _handler_fn_,                      \
     };                                                                   \
     DATA_SET(_ip_proto_handlers, _ip_proto_handler_##_handler_fn_)
 

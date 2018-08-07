@@ -18,9 +18,8 @@ static void block_sigusr2(void)
     sigemptyset(&sigset);
     sigaddset(&sigset, SIGUSR2);
 
-    if (pthread_sigmask(SIG_BLOCK, &sigset, NULL) == -1) {
+    if (pthread_sigmask(SIG_BLOCK, &sigset, NULL) == -1)
         abort();
-    }
 }
 
 void *nstack_listen(const char *socket_path)
@@ -29,14 +28,12 @@ void *nstack_listen(const char *socket_path)
     void *pa;
 
     fd = open(socket_path, O_RDWR);
-    if (fd == -1) {
+    if (fd == -1)
         return NULL;
-    }
 
     pa = mmap(0, NSTACK_SHMEM_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-    if (pa == MAP_FAILED) {
+    if (pa == MAP_FAILED)
         return NULL;
-    }
 
     block_sigusr2();
     NSTACK_SOCK_CTRL(pa)->pid_end = getpid();
@@ -61,8 +58,7 @@ ssize_t nstack_recvfrom(void *socket,
 
     do {
         struct timespec timeout = {
-            .tv_sec = NSTACK_PERIODIC_EVENT_SEC,
-            .tv_nsec = 0,
+            .tv_sec = NSTACK_PERIODIC_EVENT_SEC, .tv_nsec = 0,
         };
 
         sigtimedwait(&sigset, NULL, &timeout);
@@ -70,16 +66,14 @@ ssize_t nstack_recvfrom(void *socket,
     dgram =
         (struct nstack_dgram *) (NSTACK_INGRESS_DADDR(socket) + dgram_index);
 
-    if (address) {
+    if (address)
         *address = dgram->srcaddr;
-    }
     rd = smin(length, dgram->buf_size);
     memcpy(buffer, dgram->buf, rd);
     dgram = NULL;
 
-    if (!(flags & NSTACK_MSG_PEEK)) {
+    if (!(flags & NSTACK_MSG_PEEK))
         queue_discard(ingress_q, 1);
-    }
 
     return rd;
 }

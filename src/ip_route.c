@@ -106,9 +106,8 @@ int ip_route_update(struct ip_route *route)
         entry->route = *route;
         ip_route_tree_insert(entry);
     } else { /* Route not found so we insert it. */
-        if (ip_route_add(route)) {
+        if (ip_route_add(route))
             return -1;
-        }
     }
 
     return 0;
@@ -116,9 +115,7 @@ int ip_route_update(struct ip_route *route)
 
 int ip_route_remove(struct ip_route *route)
 {
-    struct ip_route_entry *entry;
-
-    entry =
+    struct ip_route_entry *entry =
         RB_FIND(rib_routetree, &rib_routetree, (struct ip_route_entry *) route);
     if (!entry) {
         errno = ENOENT;
@@ -188,13 +185,11 @@ int ip_route_find_by_iface(in_addr_t addr, struct ip_route *route)
 
 __constructor void ip_route_init(void)
 {
-    size_t i;
-
     RB_INIT(&rib_routetree);
     RB_INIT(&rib_sourcetree);
     SLIST_INIT(&rib_freelist);
 
-    for (i = 0; i < num_elem(rib); i++) {
+    for (size_t i = 0; i < num_elem(rib); i++) {
         SLIST_INSERT_HEAD(&rib_freelist, &rib[i], _rib_freelist_entry);
     }
 }

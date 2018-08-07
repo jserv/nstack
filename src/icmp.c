@@ -61,16 +61,14 @@ int icmp_generate_dest_unreachable(struct ip_hdr *hdr,
     /*
      * We assume there is always some space in the frame to move things around.
      */
-
     bsize = min(sizeof(msg->data), bsize);
     msg_size = sizeof(struct icmp_destunreac) + bsize;
 
     memmove(msg->data, buf, bsize);
     msg->icmp = (struct icmp){
-        .icmp_type = ICMP_TYPE_DESTUNREAC,
-        .icmp_code = code,
+        .icmp_type = ICMP_TYPE_DESTUNREAC, .icmp_code = code,
     };
-    /* TODO Next-hop MTU if code is 4*/
+    /* TODO Next-hop MTU if code is 4 */
     icmp_hton(&msg->icmp, &msg->icmp);
     msg->icmp.icmp_csum = ip_checksum(msg, msg_size);
     ip_hton(hdr, &msg->old_ip_hdr);

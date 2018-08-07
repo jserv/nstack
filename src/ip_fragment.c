@@ -107,9 +107,8 @@ struct packet_buf *get_packet_buffer(struct ip_hdr *hdr)
      * Try to find it.
      */
     p = RB_FIND(packet_buf_tree, &packet_buffer_head, &find);
-    if (p) {
+    if (p)
         return p;
-    }
 
     /*
      * Not yet allocated, so allocate a new buffer.
@@ -144,9 +143,8 @@ int ip_fragment_input(struct ip_hdr *ip_hdr, uint8_t *rx_packet)
     struct packet_buf *p;
     size_t i;
 
-    if (off > IP_MAX_BYTES) {
+    if (off > IP_MAX_BYTES)
         return -EMSGSIZE;
-    }
 
     p = get_packet_buffer(ip_hdr);
     if (!p) {
@@ -193,10 +191,10 @@ int ip_fragment_input(struct ip_hdr *ip_hdr, uint8_t *rx_packet)
         }
     }
 
-    /*
-     * Commenting out this line breaks the RFC but greatly reduces DOS
-     * possibilities againts the fragment reassembly implementation.
-     */
+/*
+ * Commenting out this line breaks the RFC but greatly reduces DOS
+ * possibilities againts the fragment reassembly implementation.
+ */
 #if 0
     p->timer = imax(ip->ip_hdr.ip_ttl, p->timer);
 #endif
@@ -206,8 +204,7 @@ int ip_fragment_input(struct ip_hdr *ip_hdr, uint8_t *rx_packet)
 
 void ip_fragment_timer(int delta_time)
 {
-    size_t i;
-    for (i = 0; i < num_elem(packet_buffer); i++) {
+    for (size_t i = 0; i < num_elem(packet_buffer); i++) {
         struct packet_buf *p = &packet_buffer[i];
 
         /* TODO not actually as thread safe as the allocation. */
@@ -215,8 +212,7 @@ void ip_fragment_timer(int delta_time)
             continue;
 
         p->timer -= delta_time;
-        if (p->timer <= 0) {
+        if (p->timer <= 0)
             release_packet_buffer(p);
-        }
     }
 }
