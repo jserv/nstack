@@ -118,6 +118,28 @@ static struct tcp_conn_tcb *tcp_new_connection(const struct tcp_conn_attr *attr)
     return conn;
 }
 
+RB_HEAD(tcp_sock_tree, nstack_sock);
+
+static struct tcp_sock_tree tcp_sock_tree_head = RB_INITIALIZER();
+
+static int tcp_socket_cmp(struct nstack_sock *a, struct nstack_sock *b)
+{
+    return memcmp(&a->info.sock_addr, &b->info.sock_addr,
+                  sizeof(struct nstack_sockaddr));
+}
+
+RB_GENERATE_STATIC(tcp_sock_tree, nstack_sock, data.tcp._entry, tcp_socket_cmp);
+
+static struct nstack_sock *find_tcp_socket(const struct nstack_sockaddr *addr)
+{
+    struct nstack_sock_info find = {
+        .sock_addr = *addr,
+    };
+
+    return RB_FIND(tcp_sock_tree, &tcp_sock_tree_head,
+                   (struct nstack_sock *) (&find));
+}
+
 static uint16_t tcp_checksum(const struct nstack_sockaddr *restrict src,
                              const struct nstack_sockaddr *restrict dst,
                              struct tcp_hdr *restrict dp,
@@ -347,6 +369,23 @@ static int tcp_input(const struct ip_hdr *ip_hdr,
     return retval;
 }
 IP_PROTO_INPUT_HANDLER(IP_PROTO_TCP, tcp_input);
+
+int nstack_tcp_bind(struct nstack_sock *sock)
+{
+    if (sock->info.sock_addr.port > NSTACK_SOCK_PORT_MAX) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    if (find_tcp_socket(&sock->info.sock_addr)) {
+        errno = EADDRINUSE;
+        return -1;
+    }
+
+    RB_INSERT(tcp_sock_tree, &tcp_sock_tree_head, sock);
+
+    return 0;
+}
 
 int nstack_tcp_send(struct nstack_sock *sock, const struct nstack_dgram *dgram)
 {

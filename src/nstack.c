@@ -95,6 +95,8 @@ static int nstack_bind(struct nstack_sock *sock)
     switch (sock->info.sock_proto) {
     case XIP_PROTO_UDP:
         return nstack_udp_bind(sock);
+    case XIP_PROTO_TCP:
+        return nstack_tcp_bind(sock);
     default:
         errno = EPROTOTYPE;
         return -1;

@@ -35,6 +35,9 @@ struct nstack_sock {
         struct {
             RB_ENTRY(nstack_sock) _entry;
         } udp;
+        struct {
+            RB_ENTRY(nstack_sock) _entry;
+        } tcp;
     } data;
     char shmem_path[80];
 };
