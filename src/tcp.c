@@ -218,7 +218,10 @@ static void tcp_ntoh(const struct tcp_hdr *net, struct tcp_hdr *host)
     /* TODO Handle opts */
 }
 
-static int tcp_fsm(struct tcp_conn_tcb *conn, struct tcp_hdr *rs, size_t bsize)
+static int tcp_fsm(struct tcp_conn_tcb *conn,
+                   struct tcp_hdr *rs,
+                   struct ip_hdr *ip_hdr,
+                   size_t bsize)
 {
     switch (conn->state) {
     case TCP_CLOSED:
@@ -231,12 +234,26 @@ static int tcp_fsm(struct tcp_conn_tcb *conn, struct tcp_hdr *rs, size_t bsize)
         if (rs->tcp_flags & TCP_SYN) {
             LOG(LOG_INFO, "SYN received");
 
+            struct nstack_sockaddr sockaddr = {
+                .inet4_addr = ip_hdr->ip_dst,
+                .port = rs->tcp_dport,
+            };
+            struct nstack_sock *sock = find_tcp_socket(&sockaddr);
+            if (!sock) {
+                LOG(LOG_INFO, "Port %d unreachable", sockaddr.port);
+                rs->tcp_flags &= ~TCP_SYN;
+                rs->tcp_flags |= TCP_RST;
+            }
             rs->tcp_flags |= TCP_ACK;
             rs->tcp_ack_num = rs->tcp_seqno + 1;
             srand(time(NULL));
             rs->tcp_seqno = rand() % 100;
 
-            conn->state = TCP_SYN_RCVD;
+            if (sock) {
+                conn->state = TCP_SYN_RCVD;
+            } else {
+                conn->state = TCP_CLOSED;
+            }
             conn->recv_next = rs->tcp_ack_num;
             conn->send_next = rs->tcp_seqno + 1;
             LOG(LOG_INFO, "%d", ((uint32_t *) &rs)[3]);
@@ -351,7 +368,6 @@ static int tcp_input(const struct ip_hdr *ip_hdr,
         LOG(LOG_INFO, "New connection %s:%i -> %s:%i", rem_str,
             attr.remote.port, loc_str, attr.local.port);
 
-        /* TODO Check if we listen the port */
         conn = tcp_new_connection(&attr);
         conn->state = TCP_LISTEN;
     } else if (!conn || (tcp->tcp_flags & TCP_SYN) || tcp_hdr_size(tcp) < 0) {
@@ -359,7 +375,7 @@ static int tcp_input(const struct ip_hdr *ip_hdr,
         return -EINVAL; /* TODO any other error handling needed here? */
     }
 
-    int retval = tcp_fsm(conn, tcp, bsize);
+    int retval = tcp_fsm(conn, tcp, ip_hdr, bsize);
     if (retval > 0) { /* Fast reply */
         tcp->tcp_sport = attr.local.port;
         tcp->tcp_dport = attr.remote.port;
