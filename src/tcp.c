@@ -287,7 +287,22 @@ static int tcp_fsm(struct tcp_conn_tcb *conn,
 
             conn->recv_next = rs->tcp_ack_num;
             conn->send_next = rs->tcp_seqno;
-            /* TODO forward the payload to application layer */
+
+            /* forward the payload to application layer */
+            struct nstack_sockaddr sockaddr = {
+                .inet4_addr = ip_hdr->ip_dst,
+                .port = rs->tcp_dport,
+            };
+            struct nstack_sock *sock = find_tcp_socket(&sockaddr);
+            struct nstack_sockaddr srcaddr = {
+                .inet4_addr = ip_hdr->ip_src,
+                .port = rs->tcp_sport,
+            };
+            size_t header_size = rs->tcp_flags >> 12 << 2;
+            nstack_sock_dgram_input(sock, &srcaddr,
+                                    ((uint8_t *) rs) + header_size,
+                                    bsize - header_size);
+
             return tcp_hdr_size(rs);
         }
         if (rs->tcp_flags & TCP_FIN) { /* Close connection. */
