@@ -9,7 +9,7 @@ static char buf[2048];
 
 int main(void)
 {
-    void *sock = nstack_listen("/tmp/unetcat.sock");
+    void *sock = nstack_listen("/tmp/tnetcat.sock");
     if (!sock) {
         perror("Failed to open sock");
         exit(1);

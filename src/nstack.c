@@ -55,6 +55,15 @@ static struct nstack_sock sockets[] = {
             },
         .shmem_path = "/tmp/unetcat.sock",
     },
+    {.info.sock_dom = XF_INET4,
+     .info.sock_type = XSOCK_STREAM,
+     .info.sock_proto = XIP_PROTO_TCP,
+     .info.sock_addr =
+         (struct nstack_sockaddr){
+             .inet4_addr = 167772162,
+             .port = 10,
+         },
+     .shmem_path = "/tmp/tnetcat.sock"},
 };
 
 static enum nstack_state get_state(void)

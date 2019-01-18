@@ -32,7 +32,7 @@ deps := $(OBJS:%.o=%.o.d)
 SHELL_HACK := $(shell mkdir -p $(OUT))
 SHELL_HACK := $(shell mkdir -p $(OUT)/linux)
 
-EXEC = $(OUT)/inetd $(OUT)/unetcat
+EXEC = $(OUT)/inetd $(OUT)/tnetcat $(OUT)/unetcat
 
 all: $(EXEC)
 
@@ -41,6 +41,9 @@ $(OUT)/%.o: $(SRC)/%.c
 
 $(OUT)/inetd: $(OBJS_core)
 	$(CC) $(CFLAGS) -o $@ $^
+
+$(OUT)/tnetcat: $(OBJS_socket)
+	$(CC) $(CFLAGS) -o $@ tests/tnetcat.c $^
 
 $(OUT)/unetcat: $(OBJS_socket)
 	$(CC) $(CFLAGS) -o $@ tests/unetcat.c $^
