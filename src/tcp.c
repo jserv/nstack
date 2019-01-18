@@ -298,7 +298,7 @@ static int tcp_fsm(struct tcp_conn_tcb *conn,
                 .inet4_addr = ip_hdr->ip_src,
                 .port = rs->tcp_sport,
             };
-            size_t header_size = rs->tcp_flags >> 12 << 2;
+            size_t header_size = tcp_hdr_size(rs);
             nstack_sock_dgram_input(sock, &srcaddr,
                                     ((uint8_t *) rs) + header_size,
                                     bsize - header_size);
