@@ -58,7 +58,8 @@ ssize_t nstack_recvfrom(void *socket,
 
     do {
         struct timespec timeout = {
-            .tv_sec = NSTACK_PERIODIC_EVENT_SEC, .tv_nsec = 0,
+            .tv_sec = NSTACK_PERIODIC_EVENT_SEC,
+            .tv_nsec = 0,
         };
 
         sigtimedwait(&sigset, NULL, &timeout);

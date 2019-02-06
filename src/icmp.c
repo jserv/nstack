@@ -66,7 +66,8 @@ int icmp_generate_dest_unreachable(struct ip_hdr *hdr,
 
     memmove(msg->data, buf, bsize);
     msg->icmp = (struct icmp){
-        .icmp_type = ICMP_TYPE_DESTUNREAC, .icmp_code = code,
+        .icmp_type = ICMP_TYPE_DESTUNREAC,
+        .icmp_code = code,
     };
     /* TODO Next-hop MTU if code is 4 */
     icmp_hton(&msg->icmp, &msg->icmp);

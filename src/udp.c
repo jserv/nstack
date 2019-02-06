@@ -94,7 +94,8 @@ static int udp_input(const struct ip_hdr *ip_hdr,
     if (sock) {
         int retval;
         struct nstack_sockaddr srcaddr = {
-            .inet4_addr = ip_hdr->ip_src, .port = udp->udp_sport,
+            .inet4_addr = ip_hdr->ip_src,
+            .port = udp->udp_sport,
         };
 
         retval = nstack_sock_dgram_input(sock, &srcaddr,
