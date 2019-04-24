@@ -1,6 +1,8 @@
-#if defined __linux__
+#if defined(__linux__)
 #include <fcntl.h>
 #include <linux/random.h>
+#else
+#include <time.h>
 #endif
 
 #include <errno.h>
@@ -252,12 +254,13 @@ static int tcp_fsm(struct tcp_conn_tcb *conn,
             rs->tcp_flags |= TCP_ACK;
             rs->tcp_ack_num = rs->tcp_seqno + 1;
 
-#if defined __linux__
+#if defined(__linux__)
             int fd = open("/dev/urandom", O_RDONLY);
             read(fd, &(rs->tcp_seqno), sizeof(rs->tcp_seqno));
             close(fd);
 #else
-            rs->tcp_seqno = 0;
+            srand(time(NULL));
+            rs->tcp_seqno = rand() % 100;
 #endif
 
             if (sock) {
