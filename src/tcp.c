@@ -1,6 +1,9 @@
-#include <errno.h>
+#if defined __linux__
 #include <fcntl.h>
 #include <linux/random.h>
+#endif
+
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
