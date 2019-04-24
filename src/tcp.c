@@ -1,7 +1,9 @@
 #include <errno.h>
+#include <fcntl.h>
+#include <linux/random.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
+#include <unistd.h>
 
 #include "nstack_ip.h"
 #include "nstack_socket.h"
@@ -246,8 +248,9 @@ static int tcp_fsm(struct tcp_conn_tcb *conn,
             }
             rs->tcp_flags |= TCP_ACK;
             rs->tcp_ack_num = rs->tcp_seqno + 1;
-            srand(time(NULL));
-            rs->tcp_seqno = rand() % 100;
+            int fd = open("/dev/urandom", O_RDONLY);
+            read(fd, &(rs->tcp_seqno), sizeof(rs->tcp_seqno));
+            close(fd);
 
             if (sock) {
                 conn->state = TCP_SYN_RCVD;
