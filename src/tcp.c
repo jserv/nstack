@@ -248,9 +248,14 @@ static int tcp_fsm(struct tcp_conn_tcb *conn,
             }
             rs->tcp_flags |= TCP_ACK;
             rs->tcp_ack_num = rs->tcp_seqno + 1;
+
+#if defined __linux__
             int fd = open("/dev/urandom", O_RDONLY);
             read(fd, &(rs->tcp_seqno), sizeof(rs->tcp_seqno));
             close(fd);
+#else
+            rs->tcp_seqno = 0;
+#endif
 
             if (sock) {
                 conn->state = TCP_SYN_RCVD;
