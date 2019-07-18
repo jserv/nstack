@@ -119,7 +119,11 @@ int ether_init(char *const args[])
 
     /* TODO Parse args */
     if (args[0]) { /* Non-default IF */
-        strcpy(if_name, args[0]);
+        if (strnlen(args[0], IFNAMSIZ) < IFNAMSIZ) { /* prevent buffer overflow */
+            strcpy(if_name, args[0]);
+        } else {
+            return -2;
+        }
     } else { /* Default IF */
         strcpy(if_name, DEFAULT_IF);
     }
