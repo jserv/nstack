@@ -363,7 +363,6 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-
     if (ip_config(handle, 167772162, 4294967040)) {
         perror("Failed to config IP");
         exit(1);
