@@ -358,6 +358,9 @@ int main(int argc, char *argv[])
     if (handle == -1) {
         perror("Failed to init");
         exit(1);
+    } else if (handle == -2) {
+        perror("Interface identifier is too long");
+        exit(1);
     }
 
     if (ip_config(handle, 167772162, 4294967040)) {
