@@ -196,6 +196,11 @@ static int arp_input(const struct ether_hdr *hdr __unused,
             LOG(LOG_WARN, "Invalid ARP op: %d", arp.arp_oper);
             break;
         }
+    } else if (arp.arp_ptype == ETHER_PROTO_IPV6) {
+        /* TODO: IPv6 support */
+        LOG(LOG_INFO, "TODO: IPv6 support - WIP");
+
+        return -EPROTOTYPE;
     } else {
         LOG(LOG_DEBUG, "Unknown ptype");
 

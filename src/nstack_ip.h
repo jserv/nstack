@@ -43,6 +43,20 @@ struct ip_hdr {
 } __attribute__((packed, aligned(4)));
 
 /**
+ * IPv6 Packet Header.
+ */
+struct ipv6_hdr {
+    uint8_t     ip_vhl;         /* version */
+    uint16_t    ip_tc;          /* traffic class */
+    uint32_t    ip_flb;         /* flowlabel (20 bits) */
+    uint32_t    ip_len;         /* payload length */
+    uint16_t    ip_nhdr;        /* next header */
+    uint16_t    ip_hopl;        /* hoplimit */
+    uint8_t     ip_src[16];     /* source address */
+    uint8_t     ip_dst[16];     /* destination address */
+} __attribute__((packed, aligned(4)));
+
+/**
  * IP Packet Header Defaults
  * @{
  */
