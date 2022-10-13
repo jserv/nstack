@@ -14,6 +14,16 @@
 #define IP_STR_LEN 17
 
 /**
+ * Stack ip "10.0.0.2" and subnet mask "255.255.255.0" in decimal form
+ * @{
+ */
+#define STACK_IP 167772162
+#define SUBNET_MASK 4294967040
+/**
+ * @}
+ */
+
+/**
  * IP Route descriptor.
  */
 struct ip_route {
