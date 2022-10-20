@@ -324,7 +324,7 @@ static int tcp_fsm(struct tcp_conn_tcb *conn,
             rs->tcp_ack_num = rs->tcp_seqno + 1;
             rs->tcp_seqno = conn->send_next;
 
-            conn->state = TCP_LAST_ACK;
+            conn->state = TCP_LAST_ACK; /* Skip TCP_CLOSE_WAIT state */
             conn->recv_next = rs->tcp_ack_num;
             conn->send_next = rs->tcp_seqno + 1;
             return tcp_hdr_size(rs);
@@ -338,11 +338,13 @@ static int tcp_fsm(struct tcp_conn_tcb *conn,
 
         return 0;
     case TCP_LAST_ACK:
+        LOG(LOG_INFO, "TCP state: TCP_LAST_ACK");
         if (rs->tcp_flags & TCP_ACK) {
-            /* TODO Remove the connection */
+            RB_REMOVE(tcp_conn_map, &tcp_conn_map, conn);
             conn->state = TCP_CLOSED;
-            return 0;
+            free(conn);
         }
+        return 0;
     /* TODO handle error? */
     case TCP_TIME_WAIT:
         LOG(LOG_INFO, "TCP state: TCP_TIME_WAIT");
