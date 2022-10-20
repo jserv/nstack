@@ -341,7 +341,7 @@ static int tcp_fsm(struct tcp_conn_tcb *conn,
         LOG(LOG_INFO, "TCP state: TCP_LAST_ACK");
         if (rs->tcp_flags & TCP_ACK) {
             RB_REMOVE(tcp_conn_map, &tcp_conn_map, conn);
-            conn->state = TCP_CLOSED; 
+            conn->state = TCP_CLOSED;
             free(conn);
         }
         return 0;
