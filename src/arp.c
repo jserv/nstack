@@ -33,6 +33,7 @@ static int arp_cache_cmp(struct arp_cache_entry *a, struct arp_cache_entry *b)
 RB_GENERATE_STATIC(arp_cache_tree, arp_cache_entry, _entry, arp_cache_cmp);
 
 static int arp_request(int ether_handle, in_addr_t spa, in_addr_t tpa);
+static struct arp_cache_entry *arp_cache_get_entry(in_addr_t ip_addr);
 
 static void arp_hton(const struct arp_ip *host, struct arp_ip *net)
 {
@@ -70,6 +71,11 @@ int arp_cache_insert(in_addr_t ip_addr,
     if (ip_addr == 0)
         return 0;
 
+    if ((entry = arp_cache_get_entry(ip_addr)) > 0) {
+        entry->age = (int) type;
+        return 0;
+    }
+
     it = arp_cache;
     for (size_t i = 0; i < num_elem(arp_cache); i++) {
         if (it->age == ARP_CACHE_FREE) {
@@ -77,12 +83,6 @@ int arp_cache_insert(in_addr_t ip_addr,
         } else if ((entry && entry->age > it->age) ||
                    (!entry && it->age >= 0)) {
             entry = it;
-        }
-        /* TODO Use RB_FIND first */
-        if (it->ip_addr == ip_addr) {
-            /* This is a replacement for an existing entry. */
-            entry = it;
-            break;
         }
         it++;
     }
