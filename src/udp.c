@@ -17,7 +17,7 @@
 
 RB_HEAD(udp_sock_tree, nstack_sock);
 
-static struct udp_sock_tree upd_sock_tree_head = RB_INITIALIZER();
+static struct udp_sock_tree udp_sock_tree_head = RB_INITIALIZER();
 
 static int udp_socket_cmp(struct nstack_sock *a, struct nstack_sock *b)
 {
@@ -33,7 +33,7 @@ static struct nstack_sock *find_udp_socket(const struct nstack_sockaddr *addr)
         .sock_addr = *addr,
     };
 
-    return RB_FIND(udp_sock_tree, &upd_sock_tree_head,
+    return RB_FIND(udp_sock_tree, &udp_sock_tree_head,
                    (struct nstack_sock *) (&find));
 }
 
@@ -63,7 +63,7 @@ int nstack_udp_bind(struct nstack_sock *sock)
         return -1;
     }
 
-    RB_INSERT(udp_sock_tree, &upd_sock_tree_head, sock);
+    RB_INSERT(udp_sock_tree, &udp_sock_tree_head, sock);
 
     return 0;
 }
