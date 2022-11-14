@@ -74,7 +74,7 @@ struct _ether_proto_handler {
     DATA_SET(_ether_proto_handlers, _ether_proto_handler_##_handler_fn_)
 
 
-const mac_addr_t mac_broadcast_addr;
+extern const mac_addr_t mac_broadcast_addr;
 
 int ether_init(char *const args[]);
 void ether_deinit(int ether_handle);

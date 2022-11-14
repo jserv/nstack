@@ -88,7 +88,7 @@ struct nstack_sock_info {
     enum nstack_sock_type sock_type;
     enum nstack_sock_proto sock_proto;
     struct nstack_sockaddr sock_addr;
-} info;
+};
 
 struct nstack_dgram {
     struct nstack_sockaddr srcaddr;
