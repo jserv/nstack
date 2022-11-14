@@ -388,24 +388,25 @@ struct qm_trace {
  * List functions.
  */
 
-#define	QMD_LIST_CHECK_HEAD(head, field) do {				\
-	if (LIST_FIRST((head)) != NULL &&				\
-	    LIST_FIRST((head))->field.le_prev !=			\
-	     &LIST_FIRST((head)))					\
-		QUEUEDEBUG_ABORT("Bad list head %p first->prev != head", (head));	\
-} while (0)
+#define QMD_LIST_CHECK_HEAD(head, field)                                      \
+    do {                                                                      \
+        if (LIST_FIRST((head)) != NULL &&                                     \
+            LIST_FIRST((head))->field.le_prev != &LIST_FIRST((head)))         \
+            QUEUEDEBUG_ABORT("Bad list head %p first->prev != head", (head)); \
+    } while (0)
 
-#define	QMD_LIST_CHECK_NEXT(elm, field) do {				\
-	if (LIST_NEXT((elm), field) != NULL &&				\
-	    LIST_NEXT((elm), field)->field.le_prev !=			\
-	     &((elm)->field.le_next))					\
-	     	QUEUEDEBUG_ABORT("Bad link elm %p next->prev != elm", (elm));	\
-} while (0)
+#define QMD_LIST_CHECK_NEXT(elm, field)                                        \
+    do {                                                                       \
+        if (LIST_NEXT((elm), field) != NULL &&                                 \
+            LIST_NEXT((elm), field)->field.le_prev != &((elm)->field.le_next)) \
+            QUEUEDEBUG_ABORT("Bad link elm %p next->prev != elm", (elm));      \
+    } while (0)
 
-#define	QMD_LIST_CHECK_PREV(elm, field) do {				\
-	if (*(elm)->field.le_prev != (elm))				\
-		QUEUEDEBUG_ABORT("Bad link elm %p prev->next != elm", (elm));	\
-} while (0)
+#define QMD_LIST_CHECK_PREV(elm, field)                                   \
+    do {                                                                  \
+        if (*(elm)->field.le_prev != (elm))                               \
+            QUEUEDEBUG_ABORT("Bad link elm %p prev->next != elm", (elm)); \
+    } while (0)
 
 #define LIST_EMPTY(head) ((head)->lh_first == NULL)
 
@@ -572,29 +573,32 @@ struct qm_trace {
         QMD_TRACE_HEAD(head);                    \
     } while (0)
 
-#define	QMD_TAILQ_CHECK_HEAD(head, field) do {				\
-	if (!TAILQ_EMPTY(head) &&					\
-	    TAILQ_FIRST((head))->field.tqe_prev !=			\
-	     &TAILQ_FIRST((head)))					\
-		QUEUEDEBUG_ABORT("Bad tailq head %p first->prev != head", (head));	\
-} while (0)
+#define QMD_TAILQ_CHECK_HEAD(head, field)                                      \
+    do {                                                                       \
+        if (!TAILQ_EMPTY(head) &&                                              \
+            TAILQ_FIRST((head))->field.tqe_prev != &TAILQ_FIRST((head)))       \
+            QUEUEDEBUG_ABORT("Bad tailq head %p first->prev != head", (head)); \
+    } while (0)
 
-#define	QMD_TAILQ_CHECK_TAIL(head, field) do {				\
-	if (*(head)->tqh_last != NULL)					\
-	    	QUEUEDEBUG_ABORT("Bad tailq NEXT(%p->tqh_last) != NULL", (head)); 	\
-} while (0)
+#define QMD_TAILQ_CHECK_TAIL(head, field)                                     \
+    do {                                                                      \
+        if (*(head)->tqh_last != NULL)                                        \
+            QUEUEDEBUG_ABORT("Bad tailq NEXT(%p->tqh_last) != NULL", (head)); \
+    } while (0)
 
-#define	QMD_TAILQ_CHECK_NEXT(elm, field) do {				\
-	if (TAILQ_NEXT((elm), field) != NULL &&				\
-	    TAILQ_NEXT((elm), field)->field.tqe_prev !=			\
-	     &((elm)->field.tqe_next))					\
-		QUEUEDEBUG_ABORT("Bad link elm %p next->prev != elm", (elm));	\
-} while (0)
+#define QMD_TAILQ_CHECK_NEXT(elm, field)                                  \
+    do {                                                                  \
+        if (TAILQ_NEXT((elm), field) != NULL &&                           \
+            TAILQ_NEXT((elm), field)->field.tqe_prev !=                   \
+                &((elm)->field.tqe_next))                                 \
+            QUEUEDEBUG_ABORT("Bad link elm %p next->prev != elm", (elm)); \
+    } while (0)
 
-#define	QMD_TAILQ_CHECK_PREV(elm, field) do {				\
-	if (*(elm)->field.tqe_prev != (elm))				\
-		QUEUEDEBUG_ABORT("Bad link elm %p prev->next != elm", (elm));	\
-} while (0)
+#define QMD_TAILQ_CHECK_PREV(elm, field)                                  \
+    do {                                                                  \
+        if (*(elm)->field.tqe_prev != (elm))                              \
+            QUEUEDEBUG_ABORT("Bad link elm %p prev->next != elm", (elm)); \
+    } while (0)
 
 #define TAILQ_INSERT_AFTER(head, listelm, elm, field)                          \
     do {                                                                       \

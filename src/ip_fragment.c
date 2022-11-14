@@ -170,7 +170,7 @@ int ip_fragment_input(struct ip_hdr *ip_hdr, uint8_t *rx_packet)
     if (p->ip_hdr.ip_len != 0) {
         int t = 0;
 
-        for (i = 0; i < (size_t)((p->ip_hdr.ip_len + 7) >> 3); i++) {
+        for (i = 0; i < (size_t) ((p->ip_hdr.ip_len + 7) >> 3); i++) {
             t |= !fragmap_tst(&p->fragmap, i);
         }
         if (!t) {

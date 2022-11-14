@@ -170,7 +170,7 @@ static uint16_t udp_checksum(const void *buff,
         sum = (sum & 0xFFFF) + (sum >> 16);
 
     /* Return the one's complement of sum */
-    return ((uint16_t)(~sum));
+    return ((uint16_t) (~sum));
 }
 
 int nstack_udp_send(struct nstack_sock *sock, const struct nstack_dgram *dgram)

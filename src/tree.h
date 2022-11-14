@@ -133,7 +133,7 @@
         if (SPLAY_EMPTY(head))                                           \
             return (NULL);                                               \
         name##_SPLAY(head, elm);                                         \
-        if ((cmp)(elm, (head)->sph_root) == 0)                           \
+        if ((cmp) (elm, (head)->sph_root) == 0)                          \
             return (head->sph_root);                                     \
         return (NULL);                                                   \
     }                                                                    \
@@ -170,7 +170,7 @@
         } else {                                                              \
             int __comp;                                                       \
             name##_SPLAY(head, elm);                                          \
-            __comp = (cmp)(elm, (head)->sph_root);                            \
+            __comp = (cmp) (elm, (head)->sph_root);                           \
             if (__comp < 0) {                                                 \
                 SPLAY_LEFT(elm, field) = SPLAY_LEFT((head)->sph_root, field); \
                 SPLAY_RIGHT(elm, field) = (head)->sph_root;                   \
@@ -193,7 +193,7 @@
         if (SPLAY_EMPTY(head))                                                \
             return (NULL);                                                    \
         name##_SPLAY(head, elm);                                              \
-        if ((cmp)(elm, (head)->sph_root) == 0) {                              \
+        if ((cmp) (elm, (head)->sph_root) == 0) {                             \
             if (SPLAY_LEFT((head)->sph_root, field) == NULL) {                \
                 (head)->sph_root = SPLAY_RIGHT((head)->sph_root, field);      \
             } else {                                                          \
@@ -215,12 +215,12 @@
         SPLAY_LEFT(&__node, field) = SPLAY_RIGHT(&__node, field) = NULL;      \
         __left = __right = &__node;                                           \
                                                                               \
-        while ((__comp = (cmp)(elm, (head)->sph_root)) != 0) {                \
+        while ((__comp = (cmp) (elm, (head)->sph_root)) != 0) {               \
             if (__comp < 0) {                                                 \
                 __tmp = SPLAY_LEFT((head)->sph_root, field);                  \
                 if (__tmp == NULL)                                            \
                     break;                                                    \
-                if ((cmp)(elm, __tmp) < 0) {                                  \
+                if ((cmp) (elm, __tmp) < 0) {                                 \
                     SPLAY_ROTATE_RIGHT(head, __tmp, field);                   \
                     if (SPLAY_LEFT((head)->sph_root, field) == NULL)          \
                         break;                                                \
@@ -230,7 +230,7 @@
                 __tmp = SPLAY_RIGHT((head)->sph_root, field);                 \
                 if (__tmp == NULL)                                            \
                     break;                                                    \
-                if ((cmp)(elm, __tmp) > 0) {                                  \
+                if ((cmp) (elm, __tmp) > 0) {                                 \
                     SPLAY_ROTATE_LEFT(head, __tmp, field);                    \
                     if (SPLAY_RIGHT((head)->sph_root, field) == NULL)         \
                         break;                                                \
@@ -607,7 +607,7 @@
         tmp = RB_ROOT(head);                                                 \
         while (tmp) {                                                        \
             parent = tmp;                                                    \
-            comp = (cmp)(elm, parent);                                       \
+            comp = (cmp) (elm, parent);                                      \
             if (comp < 0)                                                    \
                 tmp = RB_LEFT(tmp, field);                                   \
             else if (comp > 0)                                               \
