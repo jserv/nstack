@@ -82,6 +82,12 @@ struct ip_hdr {
 #define IP_MAX_BYTES 65535
 
 /**
+ * Max IP data size in bytes.
+ */
+#define IP_DATA_MAX_BYTES 65515
+
+
+/**
  * IP protocol numbers.
  * @{
  */

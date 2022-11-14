@@ -13,7 +13,7 @@ struct ip_defer {
     in_addr_t dst;
     uint8_t proto;
     size_t buf_size;
-    uint8_t buf[ETHER_ALEN];
+    uint8_t buf[IP_DATA_MAX_BYTES];
 };
 
 /*
@@ -40,12 +40,13 @@ int ip_defer_push(in_addr_t dst,
         return -ENOBUFS;
     slot = ip_defer_queue + q_wr;
 
-    if (bsize > ETHER_ALEN)
+    if (bsize > IP_DATA_MAX_BYTES)
         return -EMSGSIZE;
 
     slot->tries = 0;
     slot->dst = dst;
     slot->proto = proto;
+    slot->buf_size = bsize;
     memcpy(slot->buf, buf, bsize);
 
     q_wr = next;
