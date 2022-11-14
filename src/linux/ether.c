@@ -141,19 +141,19 @@ int ether_init(char *const args[])
         /* TODO Parse MAC addr */
         errno = ENOTSUP;
         return -1;
-    } else { /* Use the default MAC addr */
-        memset(&if_mac, 0, sizeof(struct ifreq));
-        strncpy(if_mac.ifr_name, if_name, IFNAMSIZ - 1);
-        if (ioctl(eth->el_fd, SIOCGIFHWADDR, &if_mac) < 0) {
-            goto fail;
-        }
-        eth->el_mac[0] = ((uint8_t *) &if_mac.ifr_hwaddr.sa_data)[0];
-        eth->el_mac[1] = ((uint8_t *) &if_mac.ifr_hwaddr.sa_data)[1];
-        eth->el_mac[2] = ((uint8_t *) &if_mac.ifr_hwaddr.sa_data)[2];
-        eth->el_mac[3] = ((uint8_t *) &if_mac.ifr_hwaddr.sa_data)[3];
-        eth->el_mac[4] = ((uint8_t *) &if_mac.ifr_hwaddr.sa_data)[4];
-        eth->el_mac[5] = ((uint8_t *) &if_mac.ifr_hwaddr.sa_data)[5];
     }
+
+    /* Use the default MAC addr */
+    memset(&if_mac, 0, sizeof(struct ifreq));
+    strncpy(if_mac.ifr_name, if_name, IFNAMSIZ - 1);
+    if (ioctl(eth->el_fd, SIOCGIFHWADDR, &if_mac) < 0)
+        goto fail;
+    eth->el_mac[0] = ((uint8_t *) &if_mac.ifr_hwaddr.sa_data)[0];
+    eth->el_mac[1] = ((uint8_t *) &if_mac.ifr_hwaddr.sa_data)[1];
+    eth->el_mac[2] = ((uint8_t *) &if_mac.ifr_hwaddr.sa_data)[2];
+    eth->el_mac[3] = ((uint8_t *) &if_mac.ifr_hwaddr.sa_data)[3];
+    eth->el_mac[4] = ((uint8_t *) &if_mac.ifr_hwaddr.sa_data)[4];
+    eth->el_mac[5] = ((uint8_t *) &if_mac.ifr_hwaddr.sa_data)[5];
 
     if (linux_ether_bind(eth))
         goto fail;
