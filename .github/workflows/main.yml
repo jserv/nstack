@@ -1,0 +1,20 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  nstack:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3.1.0
+    - name: default build
+      run: make
+  coding_style:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3.1.0
+    - name: coding convention
+      run: |
+            sudo apt-get install -q -y clang-format-12
+            sh .ci/check-format.sh
+      shell: bash
