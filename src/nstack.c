@@ -223,7 +223,7 @@ static void *nstack_egress_thread(void *arg)
         for (size_t i = 0; i < num_elem(sockets); i++) {
             struct nstack_sock *sock = sockets + i;
 
-            if (!queue_isempty(sock->egress_q)) {
+            if (!queue_is_empty(sock->egress_q)) {
                 int dgram_index;
                 struct nstack_dgram *dgram;
                 enum nstack_sock_proto proto;

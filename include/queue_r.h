@@ -78,7 +78,7 @@ static inline void queue_commit(queue_cb_t *cb)
  * Peek an element from the queue.
  * @param cb is a pointer to the queue control block.
  * @param index is the location where element is located in the buffer.
- * @return 0 if queue is empty; otherwise operation was succeed.
+ * @return false if queue is empty; otherwise operation was succeed.
  */
 static inline bool queue_peek(queue_cb_t *cb, int *index)
 {
@@ -136,19 +136,19 @@ static inline void queue_clear_from_pop_end(queue_cb_t *cb)
 /**
  * Check if the queue is empty.
  * @param cb is a pointer to the queue control block.
- * @return 0 if the queue is not empty.
+ * @return false if the queue is not empty.
  */
-static inline int queue_isempty(queue_cb_t *cb)
+static inline bool queue_is_empty(queue_cb_t *cb)
 {
-    return (int) (cb->m_write == cb->m_read);
+    return cb->m_write == cb->m_read;
 }
 
 /**
  * Check if the queue is full.
  * @param cb is a pointer to the queue control block.
- * @return 0 if the queue is not full.
+ * @return false if the queue is not full.
  */
-static inline bool queue_isfull(queue_cb_t *cb)
+static inline bool queue_is_full(queue_cb_t *cb)
 {
     return ((cb->m_write + 1) % cb->a_len) == cb->m_read;
 }
