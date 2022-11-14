@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/usr/bin/env -S bash -e
 
 # shmem for sockets
 dd if=/dev/zero of=/tmp/unetcat.sock bs=1024 count=1024

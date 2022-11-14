@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 source tools/assert.sh
 source tools/testenv.sh config

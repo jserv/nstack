@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/usr/bin/env -S bash -e
 
 LOCAL_IP=10.0.0.1
 STACK_IP=10.0.0.2
