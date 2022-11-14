@@ -20,7 +20,7 @@ struct ip_defer {
  * This is used to inhibit defers if it's the ip deferring code itself causing
  * defer push.
  */
-bool defer_inhibit;
+static bool defer_inhibit = false;
 
 static struct ip_defer ip_defer_queue[NSTACK_IP_DEFER_MAX];
 static size_t q_rd, q_wr;
@@ -70,11 +70,11 @@ static void ip_defer_drop(void)
 
 void ip_defer_handler(int delta_time __unused)
 {
-    defer_inhibit = 1;
+    defer_inhibit = true;
     while (1) {
         struct ip_defer *ipd = ip_defer_peek();
         if (!ipd) {
-            defer_inhibit = 0;
+            defer_inhibit = false;
             return;
         }
 
@@ -90,7 +90,7 @@ void ip_defer_handler(int delta_time __unused)
         if (ip_send(ipd->dst, ipd->proto, ipd->buf, ipd->buf_size) == -1) {
             if (errno == EHOSTUNREACH) {
                 ipd->tries++; /* Try again later. */
-                defer_inhibit = 0;
+                defer_inhibit = false;
                 return;
             }
         }
