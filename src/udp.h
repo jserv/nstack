@@ -4,8 +4,7 @@
  * @{
  */
 
-#ifndef NSTACK_UDP_H
-#define NSTACK_UDP_H
+#pragma once
 
 #include <stdint.h>
 
@@ -35,8 +34,6 @@ struct nstack_dgram;
 
 int nstack_udp_bind(struct nstack_sock *sock);
 int nstack_udp_send(struct nstack_sock *sock, const struct nstack_dgram *dgram);
-
-#endif /* NSTACK_UDP_H */
 
 /**
  * @}

@@ -1,5 +1,4 @@
-#ifndef NSTACK_UTIL_H
-#define NSTACK_UTIL_H
+#pragma once
 
 #ifndef __GLOBL1
 #define __GLOBL1(sym) __asm__(".globl " #sym)
@@ -82,5 +81,3 @@ static inline unsigned int uround_up(unsigned n, unsigned s)
 {
     return ((n + s - 1) / s) * s;
 }
-
-#endif /* NSTACK_UTIL */

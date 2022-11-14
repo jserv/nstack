@@ -25,8 +25,7 @@
  * SUCH DAMAGE.
  */
 
-#ifndef _SYS_LINKER_SET_H_
-#define _SYS_LINKER_SET_H_
+#pragma once
 
 #include "nstack_util.h"
 
@@ -80,5 +79,3 @@
  * Provide a count of the items in a set.
  */
 #define SET_COUNT(set) (SET_LIMIT(set) - SET_BEGIN(set))
-
-#endif /* _SYS_LINKER_SET_H_ */

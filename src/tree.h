@@ -23,8 +23,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _SYS_TREE_H_
-#define _SYS_TREE_H_
+#pragma once
 
 #include "nstack_util.h"
 
@@ -753,5 +752,3 @@
 #define RB_FOREACH_REVERSE_SAFE(x, name, head, y) \
     for ((x) = RB_MAX(name, head);                \
          ((x) != NULL) && ((y) = name##_RB_PREV(x), (x) != NULL); (x) = (y))
-
-#endif /* _SYS_TREE_H_ */

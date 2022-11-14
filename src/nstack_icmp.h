@@ -3,8 +3,7 @@
  * @{
  */
 
-#ifndef NSTACK_ICMP_H
-#define NSTACK_ICMP_H
+#pragma once
 
 #include <stdint.h>
 
@@ -70,8 +69,6 @@ int icmp_generate_dest_unreachable(struct ip_hdr *hdr,
                                    int code,
                                    uint8_t *buf,
                                    size_t bsize);
-
-#endif /* NSTACK_ICMP_H */
 
 /**
  * @}

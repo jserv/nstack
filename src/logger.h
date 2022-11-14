@@ -1,5 +1,4 @@
-#ifndef LOGGER_H
-#define LOGGER_H
+#pragma once
 
 #include <stdio.h>
 
@@ -17,5 +16,3 @@ enum log_level {
                 "\n",                              \
                 _level_, __func__, ##__VA_ARGS__); \
     } while (0)
-
-#endif /* LOGGER_H */

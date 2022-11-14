@@ -24,8 +24,7 @@
  * SUCH DAMAGE.
  */
 
-#ifndef _SYS_QUEUE_H_
-#define _SYS_QUEUE_H_
+#pragma once
 
 #include <err.h>
 
@@ -694,5 +693,3 @@ struct qm_trace {
         else                                                  \
             (head2)->tqh_last = &(head2)->tqh_first;          \
     } while (0)
-
-#endif /* !_SYS_QUEUE_H_ */

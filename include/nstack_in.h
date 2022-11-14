@@ -1,5 +1,4 @@
-#ifndef NSTACK_IN_H
-#define NSTACK_IN_H
+#pragma once
 
 #include <arpa/inet.h> /* TODO Maybe we want to define our own version */
 #include <stdint.h>
@@ -23,5 +22,3 @@ static inline void ip2str(in_addr_t ip, char *buf)
     bytes[3] = (ip >> 24) & 0xFF;
     sprintf(buf, "%d.%d.%d.%d", bytes[3], bytes[2], bytes[1], bytes[0]);
 }
-
-#endif /* NSTACK_IN_H */

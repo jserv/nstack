@@ -4,8 +4,7 @@
  * @{
  */
 
-#ifndef NSTACK_TCP_H
-#define NSTACK_TCP_H
+#pragma once
 
 #include <stdint.h>
 
@@ -85,8 +84,6 @@ struct nstack_sock *nstack_udp_alloc_sock(void);
 
 int nstack_tcp_bind(struct nstack_sock *sock);
 int nstack_tcp_send(struct nstack_sock *sock, const struct nstack_dgram *dgram);
-
-#endif /* NSTACK_UDP_H */
 
 /**
  * @}

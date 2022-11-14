@@ -8,8 +8,6 @@
  */
 
 #pragma once
-#ifndef QUEUE_R_H
-#define QUEUE_R_H
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -154,8 +152,6 @@ static inline bool queue_isfull(queue_cb_t *cb)
 {
     return ((cb->m_write + 1) % cb->a_len) == cb->m_read;
 }
-
-#endif /* QUEUE_R_H */
 
 /**
  * @}

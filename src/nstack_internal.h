@@ -1,5 +1,4 @@
-#ifndef NSTACK_INTERNAL_H
-#define NSTACK_INTERNAL_H
+#pragma once
 
 #include <stdatomic.h>
 #include <sys/time.h>
@@ -62,5 +61,3 @@ typedef int nstack_send_fn(struct nstack_sock *sock,
 /**
  * @}
  */
-
-#endif /* NSTACK_INTERNAL_H */

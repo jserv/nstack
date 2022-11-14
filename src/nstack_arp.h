@@ -3,8 +3,7 @@
  * @{
  */
 
-#ifndef NSTACK_ARP_H
-#define NSTACK_ARP_H
+#pragma once
 
 #include "nstack_in.h"
 #include "nstack_link.h"
@@ -70,8 +69,6 @@ int arp_cache_get_haddr(in_addr_t iface, in_addr_t ip_addr, mac_addr_t haddr);
  * Announce an IP address with ARP.
  */
 int arp_gratuitous(int ether_handle, in_addr_t spa);
-
-#endif /* NSTACK_ARP_H */
 
 /**
  * @}

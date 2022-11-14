@@ -3,8 +3,7 @@
  * @{
  */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#pragma once
 
 #define NSTACK_DATAGRAM_SIZE_MAX 4096
 
@@ -73,8 +72,6 @@
 /**
  * @}
  */
-
-#endif /* CONFIG_H */
 
 /**
  * @}

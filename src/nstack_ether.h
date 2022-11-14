@@ -3,8 +3,7 @@
  * @{
  */
 
-#ifndef NSTACK_ETHER_H
-#define NSTACK_ETHER_H
+#pragma once
 
 #include <stddef.h>
 #include <stdint.h>
@@ -146,8 +145,6 @@ int ether_output_reply(int ether_handle,
 /**
  * @}
  */
-
-#endif /* NSTACK_ETHER_H */
 
 /**
  * @}

@@ -5,8 +5,7 @@
  * @{
  */
 
-#ifndef IP_DEFER_H
-#define IP_DEFER_H
+#pragma once
 
 #include "nstack_in.h"
 
@@ -16,8 +15,6 @@ int ip_defer_push(in_addr_t dst,
                   size_t bsize);
 
 void ip_defer_handler(int delta_time);
-
-#endif /* IP_DEFER_H */
 
 /**
  * @}

@@ -1,11 +1,10 @@
+#pragma once
+
 /**
  * nstack sockets.
  * @addtogroup Socket
  * @{
  */
-
-#ifndef NSTACK_SOCKET_H
-#define NSTACK_SOCKET_H
 
 #include <stdint.h>
 #include <sys/types.h>
@@ -110,8 +109,6 @@ ssize_t nstack_sendto(void *socket,
                       size_t length,
                       int flags,
                       const struct nstack_sockaddr *dest_addr);
-
-#endif /* NSTACK_SOCKET_H */
 
 /**
  * @}

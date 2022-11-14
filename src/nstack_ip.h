@@ -4,8 +4,7 @@
  * @{
  */
 
-#ifndef NSTACK_IP_H
-#define NSTACK_IP_H
+#pragma once
 
 #include "linker_set.h"
 #include "nstack_ether.h"
@@ -214,8 +213,6 @@ int ip_fragment_input(struct ip_hdr *ip_hdr, uint8_t *rx_packet);
 /**
  * @}
  */
-
-#endif /* NSTACK_IP_H */
 
 /**
  * @}
