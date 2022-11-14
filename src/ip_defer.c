@@ -20,7 +20,7 @@ struct ip_defer {
  * This is used to inhibit defers if it's the ip deferring code itself causing
  * defer push.
  */
-static unsigned defer_inhibit;
+bool defer_inhibit;
 
 static struct ip_defer ip_defer_queue[NSTACK_IP_DEFER_MAX];
 static size_t q_rd, q_wr;
