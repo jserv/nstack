@@ -8,19 +8,21 @@
 #define SERVER "10.0.0.2"
 #define PORT 10
 
-char buf[1400];
+static char buf[1400];
 
 int main(void)
 {
-    struct sockaddr_in si_other = {.sin_family = AF_INET,
-                                   .sin_port = htons(PORT)};
-    int s;
+    struct sockaddr_in si_other = {
+        .sin_family = AF_INET,
+        .sin_port = htons(PORT),
+    };
 
     if (inet_aton(SERVER, &si_other.sin_addr) == 0) {
         fprintf(stderr, "inet_aton() failed\n");
         exit(1);
     }
 
+    int s;
     if ((s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
         perror("Failed to open socket");
         exit(1);
