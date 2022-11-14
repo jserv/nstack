@@ -73,8 +73,10 @@ void ip_defer_handler(int delta_time __unused)
     defer_inhibit = 1;
     while (1) {
         struct ip_defer *ipd = ip_defer_peek();
-        if (!ipd)
+        if (!ipd){
+            defer_inhibit = 0;
             return;
+        }
 
         if (ipd->tries++ > 3) { /* Drop the packet after couple of tries. */
             char str_ip[IP_STR_LEN];
@@ -88,11 +90,11 @@ void ip_defer_handler(int delta_time __unused)
         if (ip_send(ipd->dst, ipd->proto, ipd->buf, ipd->buf_size) == -1) {
             if (errno == EHOSTUNREACH) {
                 ipd->tries++; /* Try again later. */
+                defer_inhibit = 0;
                 return;
             }
         }
         ip_defer_drop();
     }
-    defer_inhibit = 0;
 }
 NSTACK_PERIODIC_TASK(ip_defer_handler);
