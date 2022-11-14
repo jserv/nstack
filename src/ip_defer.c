@@ -73,7 +73,7 @@ void ip_defer_handler(int delta_time __unused)
     defer_inhibit = 1;
     while (1) {
         struct ip_defer *ipd = ip_defer_peek();
-        if (!ipd){
+        if (!ipd) {
             defer_inhibit = 0;
             return;
         }
