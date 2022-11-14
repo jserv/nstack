@@ -16,3 +16,7 @@ AccessModifierOffset: -4
 ForEachMacros:
   - SET_FOREACH
   - RB_FOREACH
+  - SLIST_FOREACH
+  - STAILQ_FOREACH
+  - LIST_FOREACH
+  - TAILQ_FOREACH
