@@ -39,8 +39,8 @@
 struct tcp_segment {
     TAILQ_ENTRY(tcp_segment) _link;
     size_t size;
+    char *data;
     struct tcp_hdr header;
-    char data[0];
 };
 
 TAILQ_HEAD(tcp_segment_list, tcp_segment);
