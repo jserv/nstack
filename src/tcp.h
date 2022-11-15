@@ -33,6 +33,23 @@ struct tcp_hdr {
     uint8_t opt[0]; /*!< Options. */
 } __attribute__((packed, aligned(4)));
 
+/**
+ * TCP packet header option.
+ */
+struct tcp_option {
+    uint8_t option_kind;
+    uint8_t length;
+    union {
+        uint16_t mss;
+        uint8_t window_scale;
+        struct {
+            uint32_t tsval;
+            uint32_t tsecr;
+        };
+    };
+} __attribute__((packed, aligned(4)));
+/*TODO: support Selective ACKnowledgement (SACK)*/
+
 
 #define TCP_DOFF_MASK 0xF000 /*<! Data offset. */
 #define TCP_DOFF_OFF 12
