@@ -73,6 +73,16 @@ inline static int tcp_hdr_size(struct tcp_hdr *hdr)
     return doff * 4;
 }
 
+inline static int tcp_opt_size(struct tcp_hdr *hdr)
+{
+    const size_t doff = (hdr->tcp_flags & TCP_DOFF_MASK) >> TCP_DOFF_OFF;
+    if (doff < 5 || doff > 15) {
+        return -EINVAL;
+    }
+
+    return doff * 4 - sizeof(struct tcp_hdr);
+}
+
 /**
  * TCP Connection State.
  * Passive Open = responser/server

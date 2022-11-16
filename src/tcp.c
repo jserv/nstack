@@ -195,12 +195,62 @@ static uint16_t tcp_checksum(const struct nstack_sockaddr *restrict src,
     return ~acc;
 }
 
+static void tcp_hton_opt(struct tcp_hdr *hdr, int len)
+{
+    for (int i = 0; i < len;) {
+        if (hdr->opt[i] == 0) {
+            break;
+        }
+        if (hdr->opt[i] == 1) {
+            continue;
+        }
+        struct tcp_option *opt = (struct tcp_option *) (&(hdr->opt[i]));
+        switch (opt->option_kind) {
+        case 2: /* maximum segment size (2bytes)*/
+            opt->mss = htons(opt->mss);
+            i += opt->length;
+        case 3: /*window size (1 byte)*/
+            i += opt->length;
+        case 8: /*time stamp and echo of previous time stamp(8 bytes)*/
+            opt->tsval = htonl(opt->tsval);
+            opt->tsecr = htonl(opt->tsecr);
+            i += opt->length;
+        }
+    }
+}
+
+static void tcp_ntoh_opt(struct tcp_hdr *hdr, int len)
+{
+    for (int i = 0; i < len;) {
+        if (hdr->opt[i] == 0) {
+            break;
+        }
+        if (hdr->opt[i] == 1) {
+            continue;
+        }
+        struct tcp_option *opt = (struct tcp_option *) (&(hdr->opt[i]));
+        switch (opt->option_kind) {
+        case 2: /* maximum segment size (2bytes)*/
+            opt->mss = ntohs(opt->mss);
+            i += opt->length;
+        case 3: /*window size (1 byte)*/
+            i += opt->length;
+        case 8: /*time stamp and echo of previous time stamp(8 bytes)*/
+            opt->tsval = ntohl(opt->tsval);
+            opt->tsecr = ntohl(opt->tsecr);
+            i += opt->length;
+        }
+    }
+}
+
 static void tcp_hton(const struct nstack_sockaddr *restrict src,
                      const struct nstack_sockaddr *restrict dst,
                      const struct tcp_hdr *host,
                      struct tcp_hdr *net,
                      size_t bsize)
 {
+    int opt_len = tcp_opt_size(host);
+    tcp_hton_opt(host, opt_len);
     net->tcp_sport = htons(host->tcp_sport);
     net->tcp_dport = htons(host->tcp_dport);
     net->tcp_seqno = htonl(host->tcp_seqno);
@@ -208,7 +258,6 @@ static void tcp_hton(const struct nstack_sockaddr *restrict src,
     net->tcp_flags = htons(host->tcp_flags);
     net->tcp_win_size = htons(host->tcp_win_size);
     net->tcp_urg_ptr = htons(host->tcp_urg_ptr);
-    /* TODO Handle opts */
     net->tcp_checksum = 0;
     net->tcp_checksum = tcp_checksum(src, dst, net, bsize);
 }
@@ -222,7 +271,8 @@ static void tcp_ntoh(const struct tcp_hdr *net, struct tcp_hdr *host)
     host->tcp_flags = ntohs(net->tcp_flags);
     host->tcp_win_size = ntohs(net->tcp_win_size);
     host->tcp_urg_ptr = ntohs(net->tcp_urg_ptr);
-    /* TODO Handle opts */
+    int opt_len = tcp_opt_size(host);
+    tcp_ntoh_opt(host, opt_len);
 }
 
 static int tcp_fsm(struct tcp_conn_tcb *conn,
