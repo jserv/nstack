@@ -209,12 +209,15 @@ static void tcp_hton_opt(struct tcp_hdr *hdr, int len)
         case 2: /* maximum segment size (2bytes)*/
             opt->mss = htons(opt->mss);
             i += opt->length;
+            continue;
         case 3: /*window size (1 byte)*/
             i += opt->length;
+            continue;
         case 8: /*time stamp and echo of previous time stamp(8 bytes)*/
             opt->tsval = htonl(opt->tsval);
             opt->tsecr = htonl(opt->tsecr);
             i += opt->length;
+            continue;
         }
     }
 }
@@ -233,12 +236,15 @@ static void tcp_ntoh_opt(struct tcp_hdr *hdr, int len)
         case 2: /* maximum segment size (2bytes)*/
             opt->mss = ntohs(opt->mss);
             i += opt->length;
+            continue;
         case 3: /*window size (1 byte)*/
             i += opt->length;
+            continue;
         case 8: /*time stamp and echo of previous time stamp(8 bytes)*/
             opt->tsval = ntohl(opt->tsval);
             opt->tsecr = ntohl(opt->tsecr);
             i += opt->length;
+            continue;
         }
     }
 }
