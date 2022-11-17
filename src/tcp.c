@@ -59,8 +59,10 @@ struct tcp_conn_tcb {
     unsigned keepalive_cnt; /*!< Keepalive counter. */
 
     /* RTT Estimation. */
-    int rtt_est;     /*!< RTT estimate. */
-    int rtt_cur_seq; /*!< Seq number being timed for RTT. */
+    int rtt_est;     /*!< RTT estimator. */
+    int rtt_var;     /*!< mean deviation RTT estimator*/
+    int rtt;         /*!< RTT sample*/
+    int rtt_cur_seq; /*!< Seq number being timed for RTT esitmation. */
 
     unsigned retran_timeout; /*!< Retransmission timeout. */
     unsigned retran_count;   /*!< Number of retransmissions. */
@@ -75,6 +77,10 @@ struct tcp_conn_tcb {
 
     /* Sender. */
     uint32_t send_next; /*!< Next seqno to be used. */
+    uint32_t send_una;  /*!< Oldest unacknowledged seqno.*/
+    uint32_t send_max;  /*!< Maximum send seqno. An acceptible ACK is the one
+                           which the following inequality holds: snd_una <
+                           acknowledgment field <= snd_max */
     uint32_t send_wnd;
     uint32_t acked;
 
@@ -84,6 +90,9 @@ struct tcp_conn_tcb {
     struct tcp_segment_list unsent_list;       /*!< Unsent segments. */
     struct tcp_segment_list unacked_list;      /*!< Unacked segments. */
     struct tcp_segment_list oos_segments_list; /*!< Out of seq segments. */
+
+    int timer[TCP_T_NTIMERS];
+    pthread_mutex_t mutex;
 };
 
 struct tcp_conn_attr {
