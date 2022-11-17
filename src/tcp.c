@@ -312,8 +312,36 @@ static int tcp_fsm(struct tcp_conn_tcb *conn,
     switch (conn->state) {
     case TCP_CLOSED:
         LOG(LOG_INFO, "TCP state: TCP_CLOSED");
-
         return 0;
+    case TCP_SYN_SENT:
+        LOG(LOG_INFO, "TCP state: TCP_SYN_SENT");
+        if (rs->tcp_flags & (TCP_SYN | TCP_ACK)) {
+            LOG(LOG_INFO, "SYN & ACK received");
+            rs->tcp_flags = TCP_ACK | 5 << 12;
+            rs->tcp_ack_num = rs->tcp_seqno + 1;
+            rs->tcp_seqno = conn->send_next;
+            conn->recv_next = rs->tcp_ack_num;
+            conn->recv_wnd = rs->tcp_win_size;
+            LOG(LOG_INFO, "%d", ((uint32_t *) &rs)[3]);
+            conn->timer[TCP_T_KEEP] = 0;
+            conn->state = TCP_ESTABLISHED;
+            conn->timer[TCP_T_REXMT] =
+                1; /* TODO: Instead of utilizing retransmission, use another way
+                      to send any unsent segments after receiving SYN & ACK.*/
+            return tcp_hdr_size(rs);
+        }
+        if (rs->tcp_flags & (TCP_SYN)) {
+            /*Client and server open connection simutaneously*/
+            LOG(LOG_INFO, "SYN received, connection opened simutaneously ");
+            rs->tcp_flags = (TCP_SYN | TCP_ACK) | 5 << 12;
+            rs->tcp_ack_num = rs->tcp_seqno + 1;
+            rs->tcp_seqno = conn->send_next;
+            conn->recv_next = rs->tcp_ack_num;
+            conn->recv_wnd = rs->tcp_win_size;
+            LOG(LOG_INFO, "%d", ((uint32_t *) &rs)[3]);
+            conn->state = TCP_SYN_RCVD;
+            return tcp_hdr_size(rs);
+        }
     case TCP_LISTEN:
         LOG(LOG_INFO, "TCP state: TCP_LISTEN");
 
@@ -355,8 +383,14 @@ static int tcp_fsm(struct tcp_conn_tcb *conn,
         return 0;
     case TCP_SYN_RCVD:
         LOG(LOG_INFO, "TCP state: TCP_SYN_RCVD");
+        if ((rs->tcp_flags & TCP_RST) && rs->tcp_seqno == conn->recv_next &&
+            rs->tcp_ack_num == conn->send_next) {
+            conn->state = TCP_LISTEN;
+            return 0;
+        }
         if ((rs->tcp_flags & TCP_ACK) && rs->tcp_seqno == conn->recv_next &&
             rs->tcp_ack_num == conn->send_next) {
+            conn->timer[TCP_T_KEEP] = 0;
             conn->state = TCP_ESTABLISHED;
             return 0;
         }
@@ -516,19 +550,183 @@ int nstack_tcp_bind(struct nstack_sock *sock)
     return 0;
 }
 
+static int tcp_connection_init(struct tcp_conn_tcb *conn)
+{
+    conn->state = TCP_SYN_SENT;
+    conn->mss = TCP_MSS;
+#if defined(__linux__)
+    int fd = open("/dev/urandom", O_RDONLY);
+    read(fd, &(conn->send_next), sizeof(conn->send_next));
+    close(fd);
+#else
+    srand(time(NULL));
+    conn->send_next = rand() % 100;
+#endif
+    conn->rtt_est = TCP_TV_SRTTBASE;
+    conn->rtt_var = (TCP_RTTDFT * TCP_TIMER_PR_SLOWHZ) << 2;
+    conn->retran_timeout =
+        ((TCP_TV_SRTTBASE >> 2) + (TCP_TV_SRTTDFLT << 2)) >> 1;
+    conn->send_wnd = 502;
+    conn->send_una = conn->send_next;
+    conn->send_max = conn->send_next;
+    TAILQ_INIT(&conn->unsent_list);
+    TAILQ_INIT(&conn->unacked_list);
+    TAILQ_INIT(&conn->oos_segments_list);
+    return 0;
+}
+
+static int tcp_send_syn(struct tcp_conn_tcb *conn)
+{
+    struct tcp_option opt;
+    opt = (struct tcp_option){.option_kind = 2, .length = 4, .mss = TCP_MSS};
+
+    uint8_t buf[sizeof(struct tcp_hdr) + opt.length];
+    struct tcp_hdr *tcp = (struct tcp_hdr *) buf;
+    memcpy((struct tcp_option *) tcp->opt, &opt, opt.length);
+    tcp->tcp_seqno = conn->send_next;
+    conn->send_next++;
+    tcp->tcp_flags = TCP_SYN | 6 << 12;
+    tcp->tcp_win_size = 502;
+    tcp->tcp_sport = conn->local.port;
+    tcp->tcp_dport = conn->remote.port;
+    tcp_hton(&(conn->local), &(conn->remote), tcp, tcp, tcp_hdr_size(tcp));
+    conn->state = TCP_SYN_SENT;
+    conn->timer[TCP_T_KEEP] = TCP_TV_KEEP_INIT;
+    int retval = ip_send(conn->remote.inet4_addr, IP_PROTO_TCP, buf,
+                         sizeof(struct tcp_hdr) + opt.length);
+    return retval;
+}
+
 static int tcp_send_segments(struct tcp_conn_tcb *conn)
 {
-    return -1;
+    struct tcp_segment *seg, *seg_tmp;
+    int retval;
+    pthread_mutex_lock(&conn->mutex);
+    TAILQ_FOREACH_SAFE(seg, &conn->unsent_list, _link, seg_tmp)
+    {
+        TAILQ_REMOVE(&conn->unsent_list, seg, _link);
+        size_t hdr_size = tcp_hdr_size(&seg->header);
+        uint8_t payload[hdr_size + seg->size];
+        struct tcp_hdr *tcp = (struct tcp_hdr *) (payload);
+
+        memcpy(payload, &seg->header, hdr_size);
+        ((struct tcp_hdr *) payload)->tcp_seqno = conn->send_next;
+        ((struct tcp_hdr *) payload)->tcp_ack_num = conn->recv_next;
+        memcpy(payload + hdr_size, seg->data, seg->size);
+
+        tcp_hton(&(conn->local), &(conn->remote), tcp, tcp,
+                 hdr_size + seg->size);
+        conn->send_next += seg->size;
+        conn->send_max = conn->send_next;
+        retval = ip_send(conn->remote.inet4_addr, IP_PROTO_TCP, payload,
+                         (hdr_size + seg->size));
+        if (retval < 0) {
+            return -1;
+        }
+        TAILQ_INSERT_TAIL(&conn->unacked_list, seg, _link);
+    }
+    pthread_mutex_unlock(&conn->mutex);
+    return 0;
 }
 
 static void tcp_ack_segments(struct tcp_conn_tcb *conn, struct tcp_hdr *tcp)
 {
-    return -1;
+    struct tcp_segment *seg, *seg_tmp;
+    if (tcp->tcp_ack_num > conn->send_una) {
+        conn->send_una = tcp->tcp_ack_num;
+        pthread_mutex_lock(&conn->mutex);
+        TAILQ_FOREACH_SAFE(seg, &conn->unacked_list, _link, seg_tmp)
+        {
+            if (seg->header.tcp_seqno < conn->send_una) {
+                TAILQ_REMOVE(&conn->unacked_list, seg, _link);
+                free(seg);
+            }
+        }
+        pthread_mutex_unlock(&conn->mutex);
+        if (conn->send_una == conn->send_max) {
+            conn->timer[TCP_T_REXMT] = 0;
+        } else {
+            conn->send_next = conn->send_una;
+            conn->timer[TCP_T_REXMT] = conn->rtt_est;
+        }
+        return;
+    } else {
+        return;
+    }
 }
 
 int nstack_tcp_send(struct nstack_sock *sock, const struct nstack_dgram *dgram)
 {
-    return -1;
+    struct tcp_conn_attr attr;
+    struct tcp_hdr tcp;
+    struct tcp_segment *seg;
+    int retval;
+    memset(&attr, 0, sizeof(attr));
+    attr.local.inet4_addr = sock->info.sock_addr.inet4_addr;
+    attr.local.port = sock->info.sock_addr.port;
+    attr.remote.inet4_addr = dgram->dstaddr.inet4_addr;
+    attr.remote.port = dgram->dstaddr.port;
+    struct tcp_conn_tcb *conn = tcp_find_connection(&attr);
+    if (!conn) {
+        /*Client, send syn*/
+        char rem_str[IP_STR_LEN];
+        char loc_str[IP_STR_LEN];
+        ip2str(attr.remote.inet4_addr, rem_str);
+        ip2str(attr.local.inet4_addr, loc_str);
+        LOG(LOG_INFO, "Client request new connection %s:%i -> %s:%i", rem_str,
+            attr.remote.port, loc_str, attr.local.port);
+        conn = tcp_new_connection(&attr);
+        tcp_connection_init(conn);
+        tcp = (struct tcp_hdr){
+            .tcp_flags = TCP_PSH | TCP_ACK | (5 << TCP_DOFF_OFF),
+            .tcp_win_size = 502,
+            .tcp_sport = sock->info.sock_addr.port,
+            .tcp_dport = dgram->dstaddr.port
+
+        };
+        seg = calloc(1, sizeof(struct tcp_segment) + tcp_opt_size(&tcp) +
+                            dgram->buf_size);
+        seg->data = (seg->header.opt) + tcp_opt_size(&tcp);
+        seg->size = dgram->buf_size;
+        memcpy(seg->data, dgram->buf, dgram->buf_size);
+        memcpy(&seg->header, &tcp, tcp_hdr_size(&tcp));
+        pthread_mutex_lock(&conn->mutex);
+        TAILQ_INSERT_TAIL(&conn->unsent_list, seg, _link);
+        pthread_mutex_unlock(&conn->mutex);
+        int retval = tcp_send_syn(conn);
+        return retval;
+    } else {
+        switch (conn->state) {
+        case TCP_ESTABLISHED:
+            tcp = (struct tcp_hdr){
+                .tcp_flags = TCP_PSH | TCP_ACK | (5 << TCP_DOFF_OFF),
+                .tcp_win_size = 502,
+                .tcp_sport = conn->local.port,
+                .tcp_dport = conn->remote.port
+
+            };
+            if (conn->rtt == 0) {
+                conn->rtt = 1;
+                conn->rtt_cur_seq = conn->send_next;
+            }
+            struct tcp_segment *seg =
+                calloc(1, sizeof(struct tcp_segment) + tcp_opt_size(&tcp) +
+                              dgram->buf_size);
+            seg->data = (seg->header.opt) + tcp_opt_size(&tcp);
+            seg->size = dgram->buf_size;
+            memcpy(seg->data, dgram->buf, dgram->buf_size);
+            memcpy(&seg->header, &tcp, tcp_hdr_size(&tcp));
+            pthread_mutex_lock(&conn->mutex);
+            TAILQ_INSERT_TAIL(&conn->unsent_list, seg, _link);
+            pthread_mutex_unlock(&conn->mutex);
+            retval = tcp_send_segments(conn);
+            return retval;
+        default:
+            LOG(LOG_INFO, "TCP state: INVALID (%d)", conn->state);
+
+            return -EINVAL;
+        }
+    }
 }
 
 static void tcp_rto_update(struct tcp_conn_tcb *conn, int rtt)
