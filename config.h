@@ -17,6 +17,11 @@
 #define NSTACK_PERIODIC_EVENT_SEC 10
 
 /**
+ * Periodic TCP timer tick. (500 ms)
+ */
+#define NSTACK_TCP_TIMER_USEC 500000
+
+/**
  * ARP Configuration.
  * @{
  */

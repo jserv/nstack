@@ -20,6 +20,7 @@
 #include "tcp.h"
 #include "udp.h"
 
+extern void tcp_slowtimo();
 /**
  * nstack ingress and egress thread state.
  */
@@ -35,7 +36,7 @@ SET_DECLARE(_nstack_periodic_tasks, void);
  * nstack state variables.
  */
 static enum nstack_state nstack_state = NSTACK_STOPPED;
-static pthread_t ingress_tid, egress_tid;
+static pthread_t ingress_tid, egress_tid, tcp_timer_tid;
 static int ether_handle;
 
 static nstack_send_fn *proto_send[] = {
@@ -91,6 +92,15 @@ static int eval_timer(void)
         return !0;
     }
     return 0;
+}
+
+static void *nstack_tcp_timer_thread(void *arg)
+{
+    while (1) {
+        usleep(NSTACK_TCP_TIMER_USEC);
+        tcp_slowtimo();
+    }
+    pthread_exit(NULL);
 }
 
 /**
@@ -320,6 +330,12 @@ int nstack_start(int handle)
         return -1;
     }
 
+    if (pthread_create(&tcp_timer_tid, NULL, nstack_tcp_timer_thread, NULL)) {
+        pthread_cancel(ingress_tid);
+        pthread_cancel(egress_tid);
+        return -1;
+    }
+
     set_state(NSTACK_RUNNING);
     return 0;
 }
@@ -330,6 +346,7 @@ void nstack_stop(void)
 
     pthread_join(ingress_tid, NULL);
     pthread_join(egress_tid, NULL);
+    pthread_join(tcp_timer_tid, NULL);
 
     set_state(NSTACK_STOPPED);
 }

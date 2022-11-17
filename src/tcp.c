@@ -20,6 +20,8 @@
 #include "tcp.h"
 #include "tree.h"
 
+#define TCP_MSS 1460 /*!< TCP maximum segment size. */
+
 #define TCP_TIMER_MS 250
 #define TCP_FIN_WAIT_TIMEOUT_MS 20000
 #define TCP_SYN_RCVD_TIMEOUT_MS 20000
@@ -33,6 +35,11 @@
 #define TCP_FLAG_CLOSED 0x08
 #define TCP_FLAG_GOT_FIN 0x10
 #define TCP_FLAG_NODELAY 0x20 /*!< Disable nagle algorithm. */
+
+/**
+ * Current time. Used if RTT is measured using timestamp method.
+ */
+unsigned tcp_now = 0;
 
 /**
  * TCP Segment.
@@ -111,7 +118,6 @@ static int tcp_conn_cmp(struct tcp_conn_tcb *a, struct tcp_conn_tcb *b)
         memcmp(&a->local, &b->local, sizeof(struct nstack_sockaddr));
     const int remote =
         memcmp(&a->remote, &b->remote, sizeof(struct nstack_sockaddr));
-
     return local + remote;
 }
 
@@ -130,7 +136,7 @@ static struct tcp_conn_tcb *tcp_new_connection(const struct tcp_conn_attr *attr)
     assert(conn);
     memcpy(&conn->local, &attr->local, sizeof(struct nstack_sockaddr));
     memcpy(&conn->remote, &attr->remote, sizeof(struct nstack_sockaddr));
-
+    pthread_mutex_init(&conn->mutex, NULL);
     RB_INSERT(tcp_conn_map, &tcp_conn_map, conn);
 
     return conn;
@@ -292,11 +298,17 @@ static void tcp_ntoh(const struct tcp_hdr *net, struct tcp_hdr *host)
     tcp_ntoh_opt(host, opt_len);
 }
 
+static void tcp_rto_update(struct tcp_conn_tcb *conn, int rtt);
+static void tcp_ack_segments(struct tcp_conn_tcb *conn, struct tcp_hdr *tcp);
+
 static int tcp_fsm(struct tcp_conn_tcb *conn,
                    struct tcp_hdr *rs,
                    struct ip_hdr *ip_hdr,
                    size_t bsize)
 {
+    if (conn->rtt && (rs->tcp_ack_num > conn->rtt_cur_seq)) {
+        tcp_rto_update(conn, conn->rtt);
+    }
     switch (conn->state) {
     case TCP_CLOSED:
         LOG(LOG_INFO, "TCP state: TCP_CLOSED");
@@ -343,7 +355,6 @@ static int tcp_fsm(struct tcp_conn_tcb *conn,
         return 0;
     case TCP_SYN_RCVD:
         LOG(LOG_INFO, "TCP state: TCP_SYN_RCVD");
-
         if ((rs->tcp_flags & TCP_ACK) && rs->tcp_seqno == conn->recv_next &&
             rs->tcp_ack_num == conn->send_next) {
             conn->state = TCP_ESTABLISHED;
@@ -358,6 +369,7 @@ static int tcp_fsm(struct tcp_conn_tcb *conn,
         return tcp_hdr_size(rs);
     case TCP_ESTABLISHED:
         LOG(LOG_INFO, "TCP state: TCP_ESTABLISHED");
+        tcp_ack_segments(conn, rs);
         if ((rs->tcp_flags & TCP_ACK) && (rs->tcp_flags & TCP_PSH) &&
             rs->tcp_seqno == conn->recv_next &&
             rs->tcp_ack_num == conn->send_next) {
@@ -504,7 +516,102 @@ int nstack_tcp_bind(struct nstack_sock *sock)
     return 0;
 }
 
+static int tcp_send_segments(struct tcp_conn_tcb *conn)
+{
+    return -1;
+}
+
+static void tcp_ack_segments(struct tcp_conn_tcb *conn, struct tcp_hdr *tcp)
+{
+    return -1;
+}
+
 int nstack_tcp_send(struct nstack_sock *sock, const struct nstack_dgram *dgram)
 {
     return -1;
+}
+
+static void tcp_rto_update(struct tcp_conn_tcb *conn, int rtt)
+{
+    int delta;
+    if (conn->rtt_est != 0) {
+        delta = (rtt - 1) - (conn->rtt_est >> TCP_RTT_SHIFT);
+        if ((conn->rtt_est += delta) <= 0) {
+            conn->rtt_est = 1;
+        }
+        delta = abs(delta);
+        delta -= ((conn->rtt_var) >> (TCP_RTTVAR_SHIFT));
+        if ((conn->rtt_var += delta) <= 0) {
+            conn->rtt_var = 1;
+        }
+    } else {
+        conn->rtt_est = rtt << TCP_RTT_SHIFT;
+        conn->rtt_var = rtt << (TCP_RTTVAR_SHIFT - 1);
+    }
+    conn->retran_timeout = TCP_REXMTVAL(conn);
+    LOG(LOG_INFO, "Update RTO: value = %d", conn->retran_timeout);
+    conn->rtt = 0; /*Reset to 0 for timing and transmission of next segment. */
+}
+
+static void tcp_rexmt_prepare(struct tcp_conn_tcb *conn)
+{
+    struct tcp_segment *seg, *seg_tmp;
+    pthread_mutex_lock(&conn->mutex);
+    TAILQ_FOREACH_SAFE(seg, &conn->unsent_list, _link, seg_tmp)
+    {
+        TAILQ_REMOVE(&conn->unsent_list, seg, _link);
+        TAILQ_INSERT_TAIL(&conn->unacked_list, seg, _link);
+    }
+    TAILQ_SWAP(&conn->unsent_list, &conn->unacked_list, tcp_segment, _link);
+    pthread_mutex_unlock(&conn->mutex);
+}
+
+static void tcp_rexmt_commit(struct tcp_conn_tcb *conn)
+{
+    conn->retran_count++;
+    tcp_send_segments(conn);
+}
+
+
+static void tcp_timer(struct tcp_conn_tcb *conn, int counter_index)
+{
+    switch (counter_index) {
+    case TCP_T_REXMT:
+        conn->timer[counter_index] = conn->retran_timeout;
+        /* Karn's Algorithm: the only segments that are timed by conn->rtt are
+         * those that are not retransmitted.
+         * TODO: Use timestamps to estimate
+         * RTT instead of Karn's Algorithm */
+        conn->rtt = 0;
+        tcp_rexmt_prepare(conn);
+        tcp_rexmt_commit(conn);
+        return;
+    case TCP_T_PERSIST:
+    case TCP_T_KEEP:
+        if (conn->state < TCP_ESTABLISHED) {
+            RB_REMOVE(tcp_conn_map, &tcp_conn_map, conn);
+            free(conn);
+            return;
+        }
+
+    case TCP_T_2MSL:
+        RB_REMOVE(tcp_conn_map, &tcp_conn_map, conn);
+        free(conn);
+        return;
+    }
+}
+void tcp_slowtimo()
+{
+    struct tcp_conn_tcb *conn;
+    RB_FOREACH (conn, tcp_conn_map, &tcp_conn_map) {
+        for (int i = 0; i < TCP_T_NTIMERS; i++) {
+            if (conn->timer[i] && (--conn->timer[i] == 0)) {
+                tcp_timer(conn, i);
+            }
+        }
+        if (conn->rtt) {
+            conn->rtt++;
+        }
+    }
+    tcp_now++;
 }
