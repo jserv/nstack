@@ -102,6 +102,56 @@ enum tcp_state {
     TCP_TIME_WAIT,  /* Initiator/Simultaneus */
 };
 
+/**
+ * TCP timer counter index
+ */
+
+#define TCP_T_REXMT 0   /*<! Index of retransmission timer counter. */
+#define TCP_T_PERSIST 1 /*<! Index persist timer counter. */
+#define TCP_T_KEEP                                                             \
+    2 /*<! Index of keep alive timer counter or connection establishment timer \
+       * counter.                                                              \
+       */
+#define TCP_T_2MSL \
+    3 /*<! Index of 2MSL timer counter or FIN_WAIT2 timer counter. */
+#define TCP_T_NTIMERS 4 /*<! Number of timer counter. */
+
+
+/**
+ * TCP timer counter value (ticks for 500-ms clock)
+ */
+#define TCP_TV_MSL 60        /*<! MSL, maximum segment lifetime. */
+#define TCP_TV_MIN 2         /*<! Minimum value of retransmission timer. */
+#define TCP_TV_REXMTMAX 128  /*<! Maximum value of retransmission timer. */
+#define TCP_TV_PERSMIN 10    /*<! Minimum value of persist timer. */
+#define TCP_TV_PERSMAX 120   /*<! Maximum value of persist timer. */
+#define TCP_TV_KEEP_INIT 150 /*<! Connection-established timer value. */
+#define TCP_TV_KEEP_IDLE \
+    14400 /*<! Idle time for connection between first probe. (2 hours)*/
+#define TCP_TV_KEEPINTVL 150 /*<! Time between probes for no response. */
+#define TCP_TV_SRTTBASE \
+    0 /*<! Special value to denote no measurement yet for connection. */
+#define TCP_TV_SRTTDFLT \
+    6 /*<! Default RTT when no measurements yet for connection. */
+/* End of TCP timer counter value. */
+
+#define TCP_RTTDFT 3          /*<! Defaut RTT if no data. (3 seconds)*/
+#define TCP_TIMER_PR_SLOWHZ 2 /*<! Number of timer ticks per seconds.*/
+
+/**
+ * Multipliers ans shifters for RTT estimators.
+ */
+#define TCP_RTT_SCALE 8    /*<! For multiplying. */
+#define TCP_RTT_SHIFT 3    /*<! For shifting. */
+#define TCP_RTTVAR_SCALE 4 /*<! For multiplying. */
+#define TCP_RTTVAR_SHIFT 2 /*<! For shifting. */
+
+/**
+ * RTO (Retransmission timeout) calculation.
+ */
+#define TCP_REXMTVAL(conn) \
+    ((((conn)->rtt_est) >> TCP_RTT_SHIFT) + (conn)->rtt_var)
+
 struct nstack_sockaddr;
 
 /**
