@@ -32,7 +32,7 @@ deps := $(OBJS:%.o=%.o.d)
 SHELL_HACK := $(shell mkdir -p $(OUT))
 SHELL_HACK := $(shell mkdir -p $(OUT)/linux)
 
-EXEC = $(OUT)/inetd $(OUT)/tnetcat $(OUT)/unetcat
+EXEC = $(OUT)/inetd $(OUT)/tnetcat $(OUT)/unetcat $(OUT)/tcptest
 
 all: $(EXEC)
 
@@ -47,6 +47,9 @@ $(OUT)/tnetcat: $(OBJS_socket)
 
 $(OUT)/unetcat: $(OBJS_socket)
 	$(CC) $(CFLAGS) -o $@ tests/unetcat.c $^
+
+$(OUT)/tcptest: $(OBJS_socket)
+	$(CC) $(CFLAGS) -o $@ tests/tcptest.c $^
 
 clean:
 	$(RM) $(EXEC) $(OBJS) $(deps)

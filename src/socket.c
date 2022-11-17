@@ -104,9 +104,9 @@ ssize_t nstack_sendto(void *socket,
 
     dgram->dstaddr = *dest_addr;
     memcpy(dgram->buf, buffer, length);
+    dgram->buf_size = length;
 
     queue_commit(egress_q);
-    kill(ctrl->pid_inetd, SIGUSR2);
 
     return length;
 }
