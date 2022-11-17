@@ -5,6 +5,7 @@
 #include <time.h>
 #endif
 
+#include <assert.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
@@ -126,6 +127,7 @@ static struct tcp_conn_tcb *tcp_find_connection(struct tcp_conn_attr *find)
 static struct tcp_conn_tcb *tcp_new_connection(const struct tcp_conn_attr *attr)
 {
     struct tcp_conn_tcb *conn = calloc(1, sizeof(struct tcp_conn_tcb));
+    assert(conn);
     memcpy(&conn->local, &attr->local, sizeof(struct nstack_sockaddr));
     memcpy(&conn->remote, &attr->remote, sizeof(struct nstack_sockaddr));
 
@@ -455,6 +457,12 @@ static int tcp_input(const struct ip_hdr *ip_hdr,
     tcp_ntoh(tcp, tcp);
 
     struct tcp_conn_tcb *conn = tcp_find_connection(&attr);
+    if ((conn &&
+         ((tcp->tcp_flags & TCP_SYN) && (conn->state >= TCP_ESTABLISHED))) ||
+        tcp_hdr_size(tcp) < 0) {
+        /*Invalid flag, or invalid header size. */
+        return -EINVAL; /* TODO any other error handling needed here? */
+    }
     if (!conn && (tcp->tcp_flags & TCP_SYN)) { /* New connection */
         char rem_str[IP_STR_LEN];
         char loc_str[IP_STR_LEN];
@@ -466,9 +474,6 @@ static int tcp_input(const struct ip_hdr *ip_hdr,
 
         conn = tcp_new_connection(&attr);
         conn->state = TCP_LISTEN;
-    } else if (!conn || (tcp->tcp_flags & TCP_SYN) || tcp_hdr_size(tcp) < 0) {
-        /* No connection initiated, invalid flag, or invalid header size. */
-        return -EINVAL; /* TODO any other error handling needed here? */
     }
 
     int retval = tcp_fsm(conn, tcp, ip_hdr, bsize);
