@@ -219,6 +219,7 @@ static void tcp_hton_opt(struct tcp_hdr *hdr, int len)
             break;
         }
         if (hdr->opt[i] == 1) {
+            i += 1;
             continue;
         }
         struct tcp_option *opt = (struct tcp_option *) (&(hdr->opt[i]));
@@ -228,6 +229,12 @@ static void tcp_hton_opt(struct tcp_hdr *hdr, int len)
             i += opt->length;
             continue;
         case 3: /*window size (1 byte)*/
+            i += opt->length;
+            continue;
+        case 4:
+            i += opt->length;
+            continue;
+        case 5:
             i += opt->length;
             continue;
         case 8: /*time stamp and echo of previous time stamp(8 bytes)*/
@@ -246,6 +253,7 @@ static void tcp_ntoh_opt(struct tcp_hdr *hdr, int len)
             break;
         }
         if (hdr->opt[i] == 1) {
+            i += 1;
             continue;
         }
         struct tcp_option *opt = (struct tcp_option *) (&(hdr->opt[i]));
@@ -255,6 +263,12 @@ static void tcp_ntoh_opt(struct tcp_hdr *hdr, int len)
             i += opt->length;
             continue;
         case 3: /*window size (1 byte)*/
+            i += opt->length;
+            continue;
+        case 4:
+            i += opt->length;
+            continue;
+        case 5:
             i += opt->length;
             continue;
         case 8: /*time stamp and echo of previous time stamp(8 bytes)*/
