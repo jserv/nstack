@@ -35,6 +35,6 @@ int main(void)
         // r = nstack_recvfrom(sock, buf, sizeof(buf) - 1, 0, &addr);
         // if (r > 0)
         //     write(STDOUT_FILENO, buf, r);
-        sleep(10);
+        sleep(20);
     }
 }
