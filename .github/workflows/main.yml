@@ -18,26 +18,10 @@ jobs:
     - uses: actions/checkout@v3.1.0
     - name: tnetcat test
       run: |
-          make
           apt-get update;
           sudo apt-get install -q -y iproute2
           sudo apt-get install -q -y netcat
-          sudo ./tools/testenv.sh start
-          sleep 1s
-          ./tools/run.sh veth1 > /dev/null 2>&1 &
-          sleep 1s
-          ./build/tnetcat > /tmp/log 2>&1 &
-          sleep 1s
-          expect="foo"
-          echo -n ${expect}|nc  10.0.0.2 10 > /dev/null 2>&1 &
-          sleep 1s
-          result=$(cat /tmp/log)
-          if [ ${expect} = ${result} ]; then
-            echo "expect: ${expect} equl to result: ${result}"
-          else
-            echo "expect: ${expect} not equl to result: ${result}"
-            exit 1
-          fi
+          sh .ci/test-tnetcat.sh
       shell: bash
   unetcat:
     runs-on: self-hosted
@@ -48,26 +32,10 @@ jobs:
     - uses: actions/checkout@v3.1.0
     - name: unetcat test
       run: |
-          make
           apt-get update;
           sudo apt-get install -q -y iproute2
           sudo apt-get install -q -y netcat
-          sudo ./tools/testenv.sh start
-          sleep 1s
-          ./tools/run.sh veth1 > /dev/null 2>&1 &
-          sleep 1s
-          ./build/unetcat > /tmp/log 2>&1 &
-          sleep 1s
-          expect="foo"
-          echo -n ${expect}|nc -u 10.0.0.2 10 > /dev/null 2>&1 &
-          sleep 1s
-          result=$(cat /tmp/log)
-          if [ ${expect} = ${result} ]; then
-            echo "expect: ${expect} equl to result: ${result}"
-          else
-            echo "expect: ${expect} not equl to result: ${result}"
-            exit 1
-          fi
+          sh .ci/test-unetcat.sh
       shell: bash
   tcptest:
     runs-on: self-hosted
@@ -78,26 +46,10 @@ jobs:
     - uses: actions/checkout@v3.1.0
     - name: tcp sending test
       run: |
-          make
           apt-get update;
           sudo apt-get install -q -y iproute2
           sudo apt-get install -q -y netcat
-          sudo ./tools/testenv.sh start
-          sleep 1s
-          ./tools/run.sh veth1 > /dev/null 2>&1 &
-          sleep 1s
-          nc -l 10.0.0.1 10000 > /tmp/log 2>&1 &
-          sleep 1s
-          ./build/tcptest > /dev/null 2>&1 &
-          expect="foo"
-          sleep 10s
-          result=$(cat /tmp/log)
-          if [ ${expect} = ${result} ]; then
-            echo "expect: ${expect} equl to result: ${result}"
-          else
-            echo "expect: ${expect} not equl to result: ${result}"
-            exit 1
-          fi
+          sh .ci/test-tcptest.sh
       shell: bash
   coding_style:
     runs-on: ubuntu-22.04
