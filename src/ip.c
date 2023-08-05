@@ -296,12 +296,12 @@ int ip_send(in_addr_t dst, uint8_t proto, const uint8_t *buf, size_t bsize)
         if (errno == EHOSTUNREACH) {
             /*
              * We must defer the operation for now because we are waiting for
-             * the reveiver's MAC addr to be resolved.
+             * the receiver's MAC addr to be resolved.
              */
             retval = ip_defer_push(dst, proto, buf, bsize);
             if (retval == 0 || (retval == -EALREADY)) {
-                retval = 0; /* Return 0 to indicate an defered operation. */
-            } else {        /* else an error occured. */
+                retval = 0; /* Return 0 to indicate a deferred operation. */
+            } else {        /* else an error occurred. */
                 errno = -retval;
                 retval = -1;
             }

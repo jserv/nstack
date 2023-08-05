@@ -102,14 +102,14 @@ int ether_addr2handle(const mac_addr_t addr);
  * Receive a frame from ether.
  * @retval >0 the size of the received frame;
  * @retval  0 read timed out;
- * @retval -1 an read error occured, errno is set.
+ * @retval -1 a read error occurred, errno is set.
  */
 int ether_receive(int handle,
                   struct ether_hdr *hdr,
                   uint8_t *buf,
                   size_t bsize);
 /**
- * Send a frame to a destionation over ether.
+ * Send a frame to a destination over ether.
  */
 int ether_send(int handle,
                const mac_addr_t dst,
@@ -129,7 +129,7 @@ int ether_send(int handle,
  * Handle the received ethernet frame.
  * @retval >0 the size of the reply written back to payload;
  * @retval  0 if no reply should be sent;
- * @retval -1 an error occured, errno is set.
+ * @retval -1 an error occurred, errno is set.
  */
 int ether_input(const struct ether_hdr *hdr, uint8_t *payload, size_t bsize);
 

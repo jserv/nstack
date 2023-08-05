@@ -193,7 +193,7 @@ int ip_fragment_input(struct ip_hdr *ip_hdr, uint8_t *rx_packet)
 
 /*
  * Commenting out this line breaks the RFC but greatly reduces DOS
- * possibilities againts the fragment reassembly implementation.
+ * possibilities against the fragment reassembly implementation.
  */
 #if 0
     p->timer = imax(ip->ip_hdr.ip_ttl, p->timer);

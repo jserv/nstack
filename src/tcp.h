@@ -85,7 +85,7 @@ inline static int tcp_opt_size(struct tcp_hdr *hdr)
 
 /**
  * TCP Connection State.
- * Passive Open = responser/server
+ * Passive Open = responder/server
  * Active Open = initiator/client
  */
 enum tcp_state {
@@ -97,9 +97,9 @@ enum tcp_state {
     TCP_FIN_WAIT_1, /* Initiator */
     TCP_FIN_WAIT_2, /* Initiator */
     TCP_CLOSE_WAIT, /* Responder */
-    TCP_CLOSING,    /* Simultaneus Close */
+    TCP_CLOSING,    /* Simultaneous Close */
     TCP_LAST_ACK,   /* Responder */
-    TCP_TIME_WAIT,  /* Initiator/Simultaneus */
+    TCP_TIME_WAIT,  /* Initiator/Simultaneous */
 };
 
 /**
@@ -139,7 +139,7 @@ enum tcp_state {
 #define TCP_TIMER_PR_SLOWHZ 2 /*<! Number of timer ticks per seconds.*/
 
 /**
- * Multipliers ans shifters for RTT estimators.
+ * Multipliers and shifters for RTT estimators.
  */
 #define TCP_RTT_SCALE 8    /*<! For multiplying. */
 #define TCP_RTT_SHIFT 3    /*<! For shifting. */
