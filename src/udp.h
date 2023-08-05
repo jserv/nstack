@@ -14,7 +14,7 @@
 #define UDP_MAXLEN 65507
 
 /**
- * Type for an UDP port number.
+ * Type for a UDP port number.
  */
 typedef uint16_t udp_port_t;
 

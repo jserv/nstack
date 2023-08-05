@@ -27,7 +27,7 @@ extern void tcp_slowtimo();
 enum nstack_state {
     NSTACK_STOPPED = 0, /*!< Ingress and egress threads are not running. */
     NSTACK_RUNNING,     /*!< Ingress and egress threads are running. */
-    NSTACK_DYING,       /*!< Waiting for ingress and engress threads to stop. */
+    NSTACK_DYING,       /*!< Waiting for ingress and egress threads to stop. */
 };
 
 SET_DECLARE(_nstack_periodic_tasks, void);
@@ -106,7 +106,7 @@ static void *nstack_tcp_timer_thread(void *arg)
 /**
  * Bind an address to a socket.
  * @param[in] sock is a pointer to the socket returned by nstack_socket().
- * @returns Uppon succesful completion returns 0;
+ * @returns Upon successful completion returns 0;
  *          Otherwise -1 is returned and errno is set.
  */
 static int nstack_bind(struct nstack_sock *sock)

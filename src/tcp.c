@@ -54,7 +54,7 @@ struct tcp_segment {
 TAILQ_HEAD(tcp_segment_list, tcp_segment);
 
 /**
- * TCP Connection Cotrol Block.
+ * TCP Connection Control Block.
  */
 struct tcp_conn_tcb {
     struct nstack_sockaddr local;  /*!< Local address and port. */
@@ -70,7 +70,7 @@ struct tcp_conn_tcb {
     int rtt_est;     /*!< RTT estimator. */
     int rtt_var;     /*!< mean deviation RTT estimator*/
     int rtt;         /*!< RTT sample*/
-    int rtt_cur_seq; /*!< Seq number being timed for RTT esitmation. */
+    int rtt_cur_seq; /*!< Seq number being timed for RTT estimation. */
 
     unsigned retran_timeout; /*!< Retransmission timeout. */
     unsigned retran_count;   /*!< Number of retransmissions. */
@@ -237,7 +237,7 @@ static void tcp_hton_opt(struct tcp_hdr *hdr, int len)
         case 5:
             i += opt->length;
             continue;
-        case 8: /*time stamp and echo of previous time stamp(8 bytes)*/
+        case 8: /*timestamp and echo of previous timestamp(8 bytes)*/
             opt->tsval = htonl(opt->tsval);
             opt->tsecr = htonl(opt->tsecr);
             i += opt->length;
@@ -271,7 +271,7 @@ static void tcp_ntoh_opt(struct tcp_hdr *hdr, int len)
         case 5:
             i += opt->length;
             continue;
-        case 8: /*time stamp and echo of previous time stamp(8 bytes)*/
+        case 8: /*timestamp and echo of previous timestamp(8 bytes)*/
             opt->tsval = ntohl(opt->tsval);
             opt->tsecr = ntohl(opt->tsecr);
             i += opt->length;
@@ -345,8 +345,8 @@ static int tcp_fsm(struct tcp_conn_tcb *conn,
             return tcp_hdr_size(rs);
         }
         if (rs->tcp_flags & (TCP_SYN)) {
-            /*Client and server open connection simutaneously*/
-            LOG(LOG_INFO, "SYN received, connection opened simutaneously ");
+            /*Client and server open connection simultaneously*/
+            LOG(LOG_INFO, "SYN received, connection opened simultaneously ");
             rs->tcp_flags = (TCP_SYN | TCP_ACK) | 5 << 12;
             rs->tcp_ack_num = rs->tcp_seqno + 1;
             rs->tcp_seqno = conn->send_next;

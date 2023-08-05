@@ -151,7 +151,7 @@ static uint16_t udp_checksum(const void *buff,
             sum = (sum & 0xFFFF) + (sum >> 16);
         len -= 2;
     }
-    /* Add the padding if the packet lenght is odd */
+    /* Add the padding if the packet length is odd */
     if (len & 1)
         sum += *((uint8_t *) buf);
 

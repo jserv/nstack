@@ -55,7 +55,7 @@ struct icmp_destunreac {
  */
 
 /**
- * Generate a ICMP destination unreachable message to buf.
+ * Generate an ICMP destination unreachable message to buf.
  * This function will generate a directly returnable IP packet if hdr
  * is a pointer to a header stored in an ether buffer.
  * @param[in,out] hdr is the received header. It will be updated and
@@ -63,7 +63,7 @@ struct icmp_destunreac {
  * @param[in] code is one of the ICMP_TYPE_DESTUNREAC error codes.
  * @param[in,out] is the packet buffer given by ether layer.
  * @param[in] bsize is the size of the frame given by ether layer.
- * @return Retuns the number of bytes written.
+ * @return Returns the number of bytes written.
  */
 int icmp_generate_dest_unreachable(struct ip_hdr *hdr,
                                    int code,

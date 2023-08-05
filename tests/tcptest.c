@@ -11,7 +11,7 @@
     $ nc -lv 10.0.0.1 10000
 
    then start this program. Normally you will see message
-   print out in the terminal metioned above.
+   print out in the terminal mentioned above.
 */
 static char buf[2048];
 
